@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
 
 // Using a placeholder for heart fingers image
-const HERO_IMAGE = require('../../../assets/clapping_hands_onboarding_1774776655533.png'); 
+const HERO_IMAGE = require('../../../assets/clapping_hands_onboarding.jpg'); 
 
 export default function GeneratePlanScreen({ navigation }) {
   const handleContinue = () => {

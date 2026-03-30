@@ -6,7 +6,7 @@ import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
 
-const REVIEWER_IMG = require('../../../assets/premium_user_avatar_1774888701234_1774861704242.png');
+const REVIEWER_IMG = require('../../../assets/premium_user_avatar.jpg');
 const AVATARS = [
   'https://randomuser.me/api/portraits/women/44.jpg',
   'https://randomuser.me/api/portraits/men/32.jpg',

@@ -6,7 +6,7 @@ import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
 
-const CLAPPING_HANDS = require('../../../assets/clapping_hands_onboarding_1774776655533.png');
+const CLAPPING_HANDS = require('../../../assets/clapping_hands_onboarding.jpg');
 
 export default function HealthConnectScreen({ navigation }) {
   const [stage, setStage] = useState('thank_you'); // 'thank_you' or 'sync'
