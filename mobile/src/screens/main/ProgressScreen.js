@@ -78,11 +78,6 @@ export default function ProgressScreen() {
     ? Math.round(weeklyData.reduce((s, d) => s + parseFloat(d.fat_g || 0), 0) / weeklyData.length)
     : 0;
 
-  const heatmapData = {};
-  weeklyData.forEach((d) => {
-    heatmapData[d.date] = d.meal_count || 0;
-  });
-
   const currentWeight = weightData.length > 0 ? parseFloat(weightData[0].weight_kg) : null;
   const prevWeight = weightData.length > 1 ? parseFloat(weightData[1].weight_kg) : null;
   const trend = currentWeight && prevWeight ? currentWeight - prevWeight : 0;
@@ -90,25 +85,25 @@ export default function ProgressScreen() {
   const alreadyLoggedToday = weightData.length > 0 && 
     new Date(weightData[0].logged_at).toDateString() === new Date().toDateString();
 
-  // Consistency Score
   const consistencyScore = weeklyData.length > 0 
     ? Math.round((weeklyData.filter(d => Math.abs(d.calories - dailyTarget.calories) < 200).length / weeklyData.length) * 100)
     : 0;
 
+  const heatmapData = {};
+  weeklyData.forEach((d) => {
+    heatmapData[d.date] = d.meal_count || 0;
+  });
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      {/* Deep Space Background */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1e1a23' }]} />
       
-      {/* Decorative Glows */}
       <LinearGradient
-        colors={['rgba(139, 92, 246, 0.15)', 'transparent']}
-        style={{ position: 'absolute', top: -100, left: -100, width: 300, height: 300, borderRadius: 150 }}
-      />
-      <LinearGradient
-        colors={['rgba(236, 72, 153, 0.1)', 'transparent']}
-        style={{ position: 'absolute', bottom: 100, right: -100, width: 400, height: 400, borderRadius: 200 }}
+        colors={['#372f38', 'transparent']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.8, y: 0.8 }}
+        style={{ position: 'absolute', top: 0, left: 0, width: width, height: 400 }}
       />
 
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -122,7 +117,7 @@ export default function ProgressScreen() {
 
         {loading ? (
           <View style={styles.center}>
-             <ActivityIndicator size="large" color={colors.accentPurple} />
+             <ActivityIndicator size="large" color={colors.white} />
           </View>
         ) : (
           <ScrollView 
@@ -130,7 +125,6 @@ export default function ProgressScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Tab Bar */}
             <View style={styles.tabBar}>
               {TABS.map((tab, i) => (
                 <TouchableOpacity
@@ -143,11 +137,10 @@ export default function ProgressScreen() {
               ))}
             </View>
 
-            {/* Quick Stats Grid */}
             <View style={styles.statsGrid}>
                <View style={styles.statMiniCard}>
                   <Text style={styles.miniLabel}>Consistency</Text>
-                  <Text style={[styles.miniValue, { color: colors.accentGreen }]}>{consistencyScore}%</Text>
+                  <Text style={[styles.miniValue, { color: '#FFF' }]}>{consistencyScore}%</Text>
                </View>
                <View style={styles.statMiniCard}>
                   <Text style={styles.miniLabel}>Goal Trend</Text>
@@ -157,7 +150,6 @@ export default function ProgressScreen() {
                </View>
             </View>
 
-            {/* Weight Section */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View>
@@ -180,7 +172,6 @@ export default function ProgressScreen() {
               </View>
             </View>
 
-            {/* Calories Card */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                  <Text style={styles.cardLabel}>Calorie Trends</Text>
@@ -191,7 +182,6 @@ export default function ProgressScreen() {
               </View>
             </View>
 
-            {/* Macros Card */}
             <View style={styles.card}>
               <Text style={styles.cardLabel}>Average Nutrition Split</Text>
               <View style={styles.macroChartContainer}>
@@ -204,7 +194,6 @@ export default function ProgressScreen() {
               </View>
             </View>
 
-            {/* Log Weight Card */}
             <View style={[styles.logWeightCard, alreadyLoggedToday && styles.lockedCard]}>
               <View style={styles.logWeightLeft}>
                  <Text style={styles.logTitle}>{alreadyLoggedToday ? 'Daily Check-in' : 'Update Weight'}</Text>
@@ -222,18 +211,13 @@ export default function ProgressScreen() {
                     onChangeText={setWeightInput}
                     keyboardType="decimal-pad"
                     style={styles.weightInput}
-                    placeholderTextColor={colors.textSecondary}
+                    placeholderTextColor="rgba(255,255,255,0.4)"
                   />
                   <TouchableOpacity style={styles.saveBtn} onPress={logWeight}>
-                    <Ionicons name="add" size={24} color={colors.bgBase} />
+                    <Ionicons name="add" size={24} color={colors.black} />
                   </TouchableOpacity>
                 </View>
               )}
-            </View>
-
-            <View style={styles.heatmapSection}>
-               <Text style={styles.cardLabel}>Meal Consistency</Text>
-               <CalendarHeatmap data={heatmapData} days={30} />
             </View>
 
             <View style={{ height: 120 }} />
@@ -256,62 +240,61 @@ function MacroLabel({ dot, label, val }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1e1a23' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scroll: { paddingHorizontal: 20, paddingTop: 10 },
+  scroll: { paddingHorizontal: 16, paddingTop: 10 },
   
-  brandRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
+  brandRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 24 },
   title: { fontSize: 32, fontWeight: '900', color: '#FFF', letterSpacing: -1 },
-  streakBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bgCardSecondary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, gap: 4, borderWidth: 1, borderColor: colors.borderGray },
-  streakText: { fontSize: 15, fontWeight: '800', color: '#FFF' },
+  streakBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 100, gap: 4, borderWidth: 1, borderColor: colors.borderGray },
+  streakText: { fontSize: 16, fontWeight: '800', color: '#FFF' },
 
-  tabBar: { flexDirection: 'row', backgroundColor: colors.bgCardSecondary, borderRadius: 16, padding: 4, marginBottom: 24, borderWidth: 1, borderColor: colors.borderGray },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' },
-  tabActive: { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
-  tabText: { fontSize: 13, color: '#6A6A6E', fontWeight: '700' },
-  tabTextActive: { color: '#FFF' },
+  tabBar: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 100, padding: 4, marginBottom: 28, borderWidth: 1, borderColor: colors.borderGray },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: 100, alignItems: 'center' },
+  tabActive: { backgroundColor: '#FFF' },
+  tabText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: '800', textTransform: 'uppercase' },
+  tabTextActive: { color: colors.black },
 
   statsGrid: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statMiniCard: { flex: 1, backgroundColor: colors.bgCardSecondary, borderRadius: 24, padding: 18, borderWidth: 1, borderColor: colors.borderGray },
-  miniLabel: { fontSize: 11, color: '#6A6A6E', fontWeight: '700', textTransform: 'uppercase', marginBottom: 6 },
-  miniValue: { fontSize: 18, fontWeight: '800' },
+  statMiniCard: { flex: 1, backgroundColor: '#1e1a23', borderRadius: 28, padding: 18, borderWidth: 1, borderColor: colors.borderGray },
+  miniLabel: { fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: '800', textTransform: 'uppercase', marginBottom: 6 },
+  miniValue: { fontSize: 20, fontWeight: '900' },
 
-  card: { backgroundColor: colors.bgCardSecondary, borderRadius: 32, padding: 24, marginBottom: 16, borderWidth: 1, borderColor: colors.borderGray },
+  card: { backgroundColor: '#1e1a23', borderRadius: 28, padding: 24, marginBottom: 12, borderWidth: 1, borderColor: colors.borderGray },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  cardLabel: { fontSize: 13, color: '#9CA3AF', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  cardValue: { fontSize: 36, fontWeight: '900', color: '#FFF', marginTop: 4 },
-  unitText: { fontSize: 18, color: '#6A6A6E', fontWeight: '600' },
+  cardLabel: { fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  cardValue: { fontSize: 38, fontWeight: '900', color: '#FFF', marginTop: 4, letterSpacing: -1 },
+  unitText: { fontSize: 18, color: 'rgba(255,255,255,0.4)', fontWeight: '600' },
   
-  trendBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, gap: 4, backgroundColor: 'rgba(255,255,255,0.03)' },
-  trendText: { fontSize: 14, fontWeight: '800' },
+  trendBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, gap: 4, backgroundColor: 'rgba(255,255,255,0.05)' },
+  trendText: { fontSize: 14, fontWeight: '900' },
   chartWrapper: { height: 180, width: '100%', marginTop: 10 },
 
   macroChartContainer: { marginVertical: 10 },
   macroLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 },
   macroLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   macroDot: { width: 8, height: 8, borderRadius: 4 },
-  macroLabelText: { fontSize: 12, color: '#6A6A6E', fontWeight: '700' },
+  macroLabelText: { fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: '700' },
   macroValText: { color: '#FFF' },
 
   logWeightCard: { 
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between',
-    backgroundColor: colors.bgCardSecondary, 
-    borderRadius: 32, 
+    backgroundColor: '#1e1a23', 
+    borderRadius: 28, 
     padding: 24, 
     marginBottom: 24, 
     borderWidth: 1, 
-    borderColor: colors.accentPurple,
-    borderStyle: 'dashed'
+    borderColor: colors.borderGray,
   },
   logWeightLeft: { flex: 1 },
-  logTitle: { fontSize: 18, fontWeight: '800', color: '#FFF', marginBottom: 2 },
-  logSub: { fontSize: 13, color: '#6A6A6E', fontWeight: '600' },
-  lockedCard: { borderColor: colors.borderGray, opacity: 0.8 },
+  logTitle: { fontSize: 18, fontWeight: '900', color: '#FFF', marginBottom: 2 },
+  logSub: { fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: '700' },
+  lockedCard: { opacity: 0.6 },
   doneCheck: { width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
   weightInputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   weightInput: { 
     width: 80, 
-    backgroundColor: '#161622', 
+    backgroundColor: 'rgba(255,255,255,0.03)', 
     height: 48, 
     borderRadius: 14, 
     paddingHorizontal: 12, 
@@ -323,13 +306,11 @@ const styles = StyleSheet.create({
     borderColor: colors.borderGray
   },
   saveBtn: { 
-    backgroundColor: colors.accentGreen, 
+    backgroundColor: colors.white, 
     width: 48, 
     height: 48, 
     borderRadius: 14, 
     justifyContent: 'center', 
     alignItems: 'center' 
   },
-
-  heatmapSection: { marginBottom: 30, paddingHorizontal: 10 },
 });

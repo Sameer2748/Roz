@@ -12,7 +12,14 @@ export default function TwiceAsMuchScreen({ navigation }) {
   return (
     <OnboardingLayout
       onBack={() => navigation.goBack()}
-      progress={0.6}
+      progress={0.75}
+      footer={
+        <Button 
+          title="Continue" 
+          onPress={() => navigation.navigate('Obstacles')} 
+          style={styles.button}
+        />
+      }
     >
       <View style={styles.center}>
         <Text style={styles.title}>
@@ -30,10 +37,10 @@ export default function TwiceAsMuchScreen({ navigation }) {
 
           <View style={styles.barGroup}>
             <View style={styles.barWrapper}>
-              <View style={[styles.bar, styles.blackBar, { height: '80%' }]} />
-              <Text style={styles.barVal}>2X</Text>
+              <View style={[styles.bar, styles.whiteBar, { height: '80%' }]} />
+              <Text style={styles.barValHighlight}>2X</Text>
             </View>
-            <Text style={styles.barLabel}>With{"\n"}Roz</Text>
+            <Text style={styles.barLabelHighlight}>With{"\n"}Roz</Text>
           </View>
         </View>
         
@@ -41,14 +48,6 @@ export default function TwiceAsMuchScreen({ navigation }) {
           Roz makes it easy and holds you accountable.
         </Text>
       </View>
-
-      <View style={styles.spacer} />
-
-      <Button 
-        title="Continue" 
-        onPress={() => navigation.navigate('Obstacles')} 
-        style={styles.button}
-      />
     </OnboardingLayout>
   );
 }
@@ -75,9 +74,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginBottom: 40,
     paddingHorizontal: 30,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 24,
+    backgroundColor: colors.bgCardSecondary,
+    borderRadius: 32,
     paddingVertical: 30,
+    borderWidth: 1,
+    borderColor: colors.borderGray,
   },
   barGroup: {
     alignItems: 'center',
@@ -92,25 +93,39 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: '100%',
-    borderRadius: 12,
+    borderRadius: 16,
   },
   grayBar: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  blackBar: {
-    backgroundColor: '#000',
+  whiteBar: {
+    backgroundColor: colors.white,
   },
   barVal: {
     position: 'absolute',
     top: '50%',
     color: colors.textSecondary,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
+  },
+  barValHighlight: {
+    position: 'absolute',
+    top: '40%',
+    color: colors.black,
+    fontSize: 20,
+    fontWeight: '900',
   },
   barLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  barLabelHighlight: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: colors.white,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -120,12 +135,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     marginTop: 20,
-  },
-  spacer: {
-    flex: 1,
+    fontWeight: '500',
   },
   button: {
     marginBottom: 20,
     borderRadius: 100,
+    height: 60,
   },
 });

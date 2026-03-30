@@ -5,6 +5,7 @@ import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import SelectionButton from '../../components/ui/SelectionButton';
 import Button from '../../components/ui/Button';
 import useUserStore from '../../store/userStore';
+import colors from '../../constants/colors';
 
 const OBSTACLES = [
   { key: 'consistency', label: 'Lack of consistency', icon: 'analytics-outline' },
@@ -34,9 +35,17 @@ export default function ObstaclesScreen({ navigation }) {
 
   return (
     <OnboardingLayout
-      title="What's stopping you from reaching your goals?"
+      title="What's stopping you?"
       onBack={() => navigation.goBack()}
-      progress={0.65}
+      progress={0.8}
+      footer={
+        <Button 
+          title="Continue" 
+          onPress={handleContinue} 
+          disabled={selected.length === 0}
+          style={styles.button}
+        />
+      }
     >
       <View style={styles.cards}>
         {OBSTACLES.map((o) => (
@@ -49,15 +58,6 @@ export default function ObstaclesScreen({ navigation }) {
           />
         ))}
       </View>
-
-      <View style={styles.spacer} />
-
-      <Button 
-        title="Continue" 
-        onPress={handleContinue} 
-        disabled={selected.length === 0}
-        style={styles.button}
-      />
     </OnboardingLayout>
   );
 }
@@ -67,12 +67,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     gap: 12,
   },
-  spacer: {
-    flex: 1,
-    minHeight: 40,
-  },
   button: {
-    marginTop: 20,
+    marginBottom: 20,
     borderRadius: 100,
+    height: 60,
   },
 });

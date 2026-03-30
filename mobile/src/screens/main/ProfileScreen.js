@@ -9,7 +9,7 @@ import { signOut } from '../../services/auth';
 import useToastStore from '../../store/toastStore';
 import colors from '../../constants/colors';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const user = useAuthStore((s) => s.user);
   const clearUser = useAuthStore((s) => s.clearUser);
   const { profile, dailyTarget } = useUserStore();
@@ -30,6 +30,10 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handleEdit = () => {
+    navigation.navigate('EditProfile');
+  };
+
   return (
     <View style={styles.container}>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1e1a23' }]} />
@@ -42,14 +46,14 @@ export default function ProfileScreen() {
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.header}>
             <Text style={styles.title}>Profile</Text>
-            <TouchableOpacity style={styles.settingsIcon}>
+            <TouchableOpacity style={styles.settingsIcon} onPress={handleEdit}>
                <Ionicons name="settings-outline" size={24} color="#FFF" />
             </TouchableOpacity>
           </View>
 
           {/* User Card */}
           <View style={styles.userCard}>
-            <View style={styles.avatarWrapper}>
+            <TouchableOpacity style={styles.avatarWrapper} onPress={handleEdit}>
               {user?.avatar_url ? (
                 <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
               ) : (
@@ -60,23 +64,23 @@ export default function ProfileScreen() {
               <View style={styles.editBadge}>
                 <Ionicons name="pencil" size={12} color="#000" />
               </View>
-            </View>
+            </TouchableOpacity>
             <Text style={styles.userName}>{user?.name || 'User'}</Text>
             <Text style={styles.userEmail}>{user?.email}</Text>
           </View>
 
-          {/* Stats */}
+          {/* Stats... (unchanged) */}
           <View style={styles.statsGrid}>
-            <StatCard label="Daily Goal" value={`${dailyTarget?.calories || '-'}`} unit="kcal" icon="flame" color={colors.accentOrange} />
-            <StatCard label="Protein" value={`${Math.round(dailyTarget?.protein_g || 0)}`} unit="g" icon="food-drumstick" color={colors.accentGreen} isMaterial />
-            <StatCard label="Goal" value={formatGoal(profile?.goal)} icon="target" color={colors.accentPurple} isMaterial />
-            <StatCard label="Activity" value={formatActivity(profile?.activity_level)} icon="walk" color={colors.accentGold} />
+             <StatCard label="Daily Goal" value={`${dailyTarget?.calories || '-'}`} unit="kcal" icon="flame" color={colors.accentOrange} />
+             <StatCard label="Protein" value={`${Math.round(dailyTarget?.protein_g || 0)}`} unit="g" icon="food-drumstick" color={colors.accentGreen} isMaterial />
+             <StatCard label="Goal" value={formatGoal(profile?.goal)} icon="target" color={colors.accentPurple} isMaterial />
+             <StatCard label="Activity" value={formatActivity(profile?.activity_level)} icon="walk" color={colors.accentGold} />
           </View>
 
           {/* Settings Group */}
           <View style={styles.menuGroup}>
             <Text style={styles.groupLabel}>Account</Text>
-            <SettingsRow icon="person-outline" label="Personal Information" />
+            <SettingsRow icon="person-outline" label="Personal Information" onPress={handleEdit} />
             <SettingsRow icon="notifications-outline" label="Notifications" />
             <SettingsRow icon="shield-checkmark-outline" label="Privacy & Security" />
           </View>

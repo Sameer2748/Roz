@@ -6,6 +6,13 @@ import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
 
+const REVIEWER_IMG = require('../../../assets/premium_user_avatar_1774888701234_1774861704242.png');
+const AVATARS = [
+  'https://randomuser.me/api/portraits/women/44.jpg',
+  'https://randomuser.me/api/portraits/men/32.jpg',
+  'https://randomuser.me/api/portraits/women/68.jpg',
+];
+
 export default function RatingScreen({ navigation }) {
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -14,7 +21,7 @@ export default function RatingScreen({ navigation }) {
 
   return (
     <OnboardingLayout
-      title="Give us a rating"
+      title="Trusted by millions"
       onBack={() => navigation.goBack()}
       progress={0.95}
       footer={
@@ -28,27 +35,29 @@ export default function RatingScreen({ navigation }) {
       <View style={styles.center}>
         <View style={styles.starsRow}>
           {[1, 2, 3, 4, 5].map(i => (
-            <Ionicons key={i} name="star" size={32} color="#FBBF24" />
+            <Ionicons key={i} name="star" size={32} color={colors.accentGold} />
           ))}
         </View>
 
         <Text style={styles.subTitle}>Roz was made for{"\n"}people like you</Text>
 
         <View style={styles.avatarsRow}>
-           <View style={styles.avatar} />
-           <View style={styles.avatar} />
-           <View style={styles.avatar} />
-           <Text style={styles.avatarText}>+3M Roz users</Text>
+          {AVATARS.map((url, i) => (
+            <Image key={i} source={{ uri: url }} style={[styles.avatar, { zIndex: 10 - i }]} />
+          ))}
+          <View style={styles.avatarTextContainer}>
+            <Text style={styles.avatarText}>+3M Roz users</Text>
+          </View>
         </View>
 
         <View style={styles.reviewCard}>
           <View style={styles.reviewHeader}>
-             <View style={styles.reviewAvatar} />
+             <Image source={REVIEWER_IMG} style={styles.reviewAvatar} />
              <View>
                 <Text style={styles.reviewName}>Marley Bryle</Text>
                 <View style={styles.reviewStars}>
                   {[1, 2, 3, 4, 5].map(i => (
-                    <Ionicons key={i} name="star" size={10} color="#FBBF24" />
+                    <Ionicons key={i} name="star" size={10} color={colors.accentGold} />
                   ))}
                 </View>
              </View>
@@ -66,20 +75,29 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', paddingTop: 60 },
   starsRow: { flexDirection: 'row', gap: 8, marginBottom: 40 },
   subTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', marginBottom: 20 },
-  avatarsRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 60, gap: -10 },
-  avatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E5E7EB', borderWidth: 2, borderColor: '#FFF' },
-  avatarText: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginLeft: 20 },
+  avatarsRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 60 },
+  avatar: { 
+    width: 36, 
+    height: 36, 
+    borderRadius: 18, 
+    borderWidth: 2, 
+    borderColor: colors.background,
+    marginLeft: -12, // Overlap effect
+  },
+  avatarTextContainer: { marginLeft: 16 },
+  avatarText: { fontSize: 13, fontWeight: '800', color: colors.textSecondary },
   reviewCard: { 
-    backgroundColor: '#000', 
-    borderRadius: 24, 
+    backgroundColor: colors.bgCardSecondary, 
+    borderRadius: 32, 
     padding: 24, 
     width: '100%',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   reviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  reviewAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#374151' },
-  reviewName: { fontSize: 14, fontWeight: '700', color: '#FFF' },
+  reviewAvatar: { width: 44, height: 44, borderRadius: 22 },
+  reviewName: { fontSize: 15, fontWeight: '800', color: colors.textPrimary },
   reviewStars: { flexDirection: 'row', gap: 2 },
-  reviewText: { fontSize: 14, color: '#9CA3AF', lineHeight: 20, fontStyle: 'italic' },
-  button: { marginBottom: 20, borderRadius: 100 },
+  reviewText: { fontSize: 15, color: colors.textSecondary, lineHeight: 22, fontWeight: '500', fontStyle: 'italic' },
+  button: { marginBottom: 20, borderRadius: 100, height: 60 },
 });

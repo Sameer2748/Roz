@@ -3,13 +3,16 @@ import { View, Text, StyleSheet, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import Button from '../../components/ui/Button';
+import useUserStore from '../../store/userStore';
 import colors from '../../constants/colors';
 
 export default function ReferralCodeScreen({ navigation }) {
+  const updateOnboardingData = useUserStore((s) => s.updateOnboardingData);
   const [code, setCode] = useState('');
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    updateOnboardingData({ referral_code: code.trim() });
     navigation.navigate('GeneratePlan');
   };
 
@@ -17,7 +20,7 @@ export default function ReferralCodeScreen({ navigation }) {
     <OnboardingLayout
       title="Do you have a referral code?"
       onBack={() => navigation.goBack()}
-      progress={0.97}
+      progress={0.9}
       footer={
         <Button 
           title="Continue" 
@@ -34,7 +37,7 @@ export default function ReferralCodeScreen({ navigation }) {
           placeholder="Referral Code"
           value={code}
           onChangeText={setCode}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#666"
           autoCapitalize="characters"
         />
       </View>
@@ -44,18 +47,18 @@ export default function ReferralCodeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', paddingTop: 60 },
-  subtext: { fontSize: 16, color: colors.textSecondary, marginBottom: 40, width: '100%' },
+  subtext: { fontSize: 16, color: colors.textSecondary, marginBottom: 40, width: '100%', fontWeight: '500' },
   input: { 
     width: '100%', 
-    height: 60, 
-    backgroundColor: '#F9FAFB', 
-    borderRadius: 16, 
+    height: 64, 
+    backgroundColor: colors.bgCardSecondary, 
+    borderRadius: 20, 
     paddingHorizontal: 20, 
-    fontSize: 16, 
-    fontWeight: '600',
+    fontSize: 18, 
+    fontWeight: '800',
     color: colors.textPrimary,
     borderWidth: 1.5,
-    borderColor: '#F3F4F6'
+    borderColor: colors.borderGray,
   },
-  button: { marginBottom: 20, borderRadius: 100 },
+  button: { marginBottom: 20, borderRadius: 100, height: 60 },
 });

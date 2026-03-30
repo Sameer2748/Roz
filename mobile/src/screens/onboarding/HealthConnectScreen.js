@@ -6,7 +6,6 @@ import OnboardingLayout from '../../components/ui/OnboardingLayout';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
 
-// Using the generated image path
 const CLAPPING_HANDS = require('../../../assets/clapping_hands_onboarding_1774776655533.png');
 
 export default function HealthConnectScreen({ navigation }) {
@@ -35,7 +34,7 @@ export default function HealthConnectScreen({ navigation }) {
           
           <View style={styles.privacyBox}>
             <Text style={styles.privacyText}>
-              <Ionicons name="shield-checkmark" size={14} color="#D97706" /> Your privacy and security matter to us.
+              <Ionicons name="shield-checkmark" size={14} color={colors.accentGold} /> Your privacy and security matter to us.
             </Text>
             <Text style={styles.privacySubtext}>
               We promise to always keep your personal information private and secure.
@@ -62,14 +61,14 @@ export default function HealthConnectScreen({ navigation }) {
       <View style={styles.center}>
         <View style={styles.syncVisual}>
           <View style={styles.syncCircle}>
-             <Ionicons name="logo-apple" size={32} color="#000" />
+             <Ionicons name="logo-apple" size={32} color={colors.white} />
           </View>
           <View style={styles.syncArrow}>
-             <Ionicons name="sync" size={24} color={colors.textTertiary} />
+             <Ionicons name="sync" size={24} color={colors.textSecondary} />
           </View>
           <View style={styles.syncCircle}>
              <View style={styles.appIconPlaceholder}>
-                <View style={styles.appIn} />
+                <View style={[styles.appIn, { backgroundColor: colors.white }]} />
              </View>
           </View>
         </View>
@@ -101,16 +100,18 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', paddingTop: 60 },
   heroImage: { width: 200, height: 200, borderRadius: 100, marginBottom: 40 },
   title: { fontSize: 32, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', marginBottom: 12 },
-  subtitle: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: 40 },
+  subtitle: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', paddingHorizontal: 40, fontWeight: '500' },
   privacyBox: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: colors.bgCardSecondary,
+    borderRadius: 24,
+    padding: 24,
     marginTop: 60,
     width: '100%',
+    borderWidth: 1,
+    borderColor: colors.borderGray,
   },
-  privacyText: { fontSize: 14, fontWeight: '700', color: colors.textPrimary, marginBottom: 4 },
-  privacySubtext: { fontSize: 12, color: colors.textTertiary, lineHeight: 18 },
+  privacyText: { fontSize: 14, fontWeight: '800', color: colors.textPrimary, marginBottom: 6 },
+  privacySubtext: { fontSize: 13, color: colors.textSecondary, lineHeight: 20, fontWeight: '500' },
   syncVisual: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -119,13 +120,13 @@ const styles = StyleSheet.create({
   },
   syncCircle: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.bgCardSecondary,
     justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: '#E5E7EB',
+    borderWidth: 1.5, borderColor: colors.borderGray,
   },
-  appIn: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#000' },
+  appIn: { width: 40, height: 40, borderRadius: 10 },
   spacer: { flex: 1 },
-  button: { marginBottom: 12, borderRadius: 100 },
+  button: { marginBottom: 12, borderRadius: 100, height: 60 },
   laterBtn: { paddingVertical: 12, alignItems: 'center' },
-  laterText: { fontSize: 16, fontWeight: '600', color: colors.textSecondary },
+  laterText: { fontSize: 16, fontWeight: '700', color: colors.textSecondary },
 });

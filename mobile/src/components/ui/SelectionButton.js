@@ -33,7 +33,7 @@ export default function SelectionButton({
           <Ionicons 
             name={icon} 
             size={24} 
-            color={selected ? colors.white : colors.textPrimary} 
+            color={selected ? colors.black : colors.textPrimary} 
             style={styles.icon}
           />
         )}
@@ -57,7 +57,7 @@ export default function SelectionButton({
         </View>
       </View>
       {selected && icon && (
-        <Ionicons name="checkmark-circle" size={24} color={colors.white} />
+        <Ionicons name="checkmark-circle" size={24} color={colors.black} />
       )}
     </TouchableOpacity>
   );
@@ -66,9 +66,9 @@ export default function SelectionButton({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 20, // More rounded per design
+    borderRadius: 24, 
     borderWidth: 1.5,
-    marginBottom: 16, // More space between
+    marginBottom: 16,
     paddingVertical: 20,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   unselectedContainer: {
-    backgroundColor: '#F9FAFB', // Slightly lighter per design
-    borderColor: '#F3F4F6',
+    backgroundColor: colors.bgCardSecondary,
+    borderColor: colors.borderGray,
   },
   selectedContainer: {
     backgroundColor: colors.ctaBackground,
@@ -95,23 +95,24 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.textPrimary,
   },
   subtitle: {
     fontSize: 13,
     marginTop: 4,
+    fontWeight: '500',
   },
   unselectedLabel: {
     color: colors.textPrimary,
   },
   selectedLabel: {
-    color: colors.white,
+    color: colors.black,
   },
   unselectedSubtitle: {
-    color: colors.textTertiary,
+    color: colors.textSecondary,
   },
   selectedSubtitle: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'rgba(0, 0, 0, 0.6)',
   },
 });

@@ -138,36 +138,39 @@ export default function HeightWeightScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   header: { marginBottom: 40, paddingHorizontal: 10 },
-  title: { 
-    fontSize: 36, 
-    fontWeight: '800', 
-    color: colors.textPrimary, 
-    marginBottom: 12,
-    textAlign: 'center',
+  toggleRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 40, 
+    gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    paddingVertical: 12,
+    borderRadius: 20,
+    width: '100%',
   },
-  subtitle: { 
+  toggleText: { 
     fontSize: 16, 
-    color: colors.textSecondary, 
-    lineHeight: 22,
+    fontWeight: '800', 
+    color: colors.textSecondary,
+    width: 80,
     textAlign: 'center',
   },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 40, gap: 12 },
-  toggleText: { fontSize: 18, fontWeight: '700', color: '#E5E7EB' },
   activeToggle: { color: colors.textPrimary },
   pickersContainer: { 
     flexDirection: 'row', 
     justifyContent: 'center',
-    gap: 40, // Increased gap for better column separation
+    gap: 40, 
     marginTop: 20,
   },
   column: { alignItems: 'center' }, 
-  columnLabel: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 32 },
+  columnLabel: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginBottom: 32 },
   pickerRow: { flexDirection: 'row', gap: 12 }, 
   smallWheel: { width: 85, height: 280, flex: 0 }, 
   largeWheel: { width: 140, height: 280, flex: 0 },
-  spacer: { flex: 1 },
   button: { 
     marginBottom: 20, 
     borderRadius: 100,
+    height: 60,
   },
 });

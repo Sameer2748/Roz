@@ -29,7 +29,6 @@ export default function SpeedScreen({ navigation }) {
   const [speed, setSpeed] = useState(1.0);
   const translateX = useSharedValue(((1.0 - 0.2) / 2.8) * SLIDER_WIDTH);
 
-  // Derived strings for high-performance updates
   const displayString = useDerivedValue(() => {
     const s = interpolate(translateX.value, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP);
     const lbs = s.toFixed(1);
@@ -41,13 +40,7 @@ export default function SpeedScreen({ navigation }) {
     text: displayString.value,
   }));
 
-  const updateSpeedJS = (val) => {
-    const rounded = Math.round(val * 10) / 10;
-    if (rounded !== speed) {
-      setSpeed(rounded);
-      Haptics.selectionAsync();
-    }
-  };
+  const triggerHaptic = () => Haptics.selectionAsync();
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx) => {
@@ -56,18 +49,26 @@ export default function SpeedScreen({ navigation }) {
     onActive: (event, ctx) => {
       let nextX = ctx.startX + event.translationX;
       nextX = Math.max(0, Math.min(SLIDER_WIDTH, nextX));
+      
+      const oldVal = Math.round(interpolate(translateX.value, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 10);
+      const newVal = Math.round(interpolate(nextX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 10);
+      
       translateX.value = nextX;
       
-      const newSpeed = interpolate(nextX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP);
-      runOnJS(updateSpeedJS)(newSpeed);
+      if (oldVal !== newVal) {
+        runOnJS(triggerHaptic)();
+      }
     },
-    onEnd: () => {
+    onEnd: (event) => {
+      const finalX = Math.max(0, Math.min(SLIDER_WIDTH, translateX.value));
+      const finalSpeed = interpolate(finalX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP);
+      runOnJS(setSpeed)(Math.round(finalSpeed * 10) / 10);
       runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
     }
   });
 
   const animatedThumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value - 15 }],
+    transform: [{ translateX: translateX.value - 15 }, { scale: 1.1 }],
   }));
 
   const handleContinue = () => {
@@ -78,7 +79,7 @@ export default function SpeedScreen({ navigation }) {
 
   return (
     <OnboardingLayout
-      title="How fast do you want to reach your goal?"
+      title="How fast is the goal?"
       onBack={() => navigation.goBack()}
       progress={0.55}
       footer={
@@ -92,7 +93,6 @@ export default function SpeedScreen({ navigation }) {
       <View style={styles.content}>
         <Text style={styles.speedLabel}>{action} weight speed per week</Text>
         
-        {/* Animated value display to prevent re-renders */}
         <View style={styles.valueContainer}>
           <AnimatedTextInput
             underlineColorAndroid="transparent"
@@ -105,9 +105,9 @@ export default function SpeedScreen({ navigation }) {
 
         <View style={styles.sliderWrapper}>
           <View style={styles.iconsRow}>
-            <Text style={styles.emoji}>🐢</Text>
-            <Text style={styles.emoji}>🐇</Text>
-            <Text style={styles.emoji}>🐆</Text>
+             <Text style={styles.emoji}>🐢</Text>
+             <Text style={styles.emoji}>🐇</Text>
+             <Text style={styles.emoji}>🐆</Text>
           </View>
           
           <View style={styles.trackContainer}>
@@ -127,7 +127,7 @@ export default function SpeedScreen({ navigation }) {
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>Expert Recommendation</Text>
           <Text style={styles.infoText}>
-            Losing 0.5 - 1 kg per week is considered healthy and sustainable for long-term results.
+            Setting a path between 0.5 - 1 kg per week is considered healthy and sustainable for long-term results.
           </Text>
         </View>
       </View>
@@ -137,40 +137,47 @@ export default function SpeedScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   content: { flex: 1, alignItems: 'center', paddingTop: 20 },
-  speedLabel: { fontSize: 16, color: colors.textSecondary, marginBottom: 8, fontWeight: '600' },
-  valueContainer: { height: 60, width: SW, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
-  speedValue: { fontSize: 32, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', width: '100%' },
+  speedLabel: { fontSize: 16, color: colors.textSecondary, marginBottom: 8, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  valueContainer: { height: 80, width: SW, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  speedValue: { fontSize: 34, fontWeight: '900', color: colors.textPrimary, textAlign: 'center', width: '100%' },
   sliderWrapper: { width: SLIDER_WIDTH + 30, marginBottom: 40 },
   iconsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   emoji: { fontSize: 24 },
   trackContainer: { height: 40, justifyContent: 'center', position: 'relative' },
-  trackBackground: { height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, width: SLIDER_WIDTH, alignSelf: 'center' },
+  trackBackground: { 
+    height: 10, 
+    backgroundColor: colors.bgCardSecondary, 
+    borderRadius: 5, 
+    width: SLIDER_WIDTH, 
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderGray,
+  },
   thumb: {
     position: 'absolute',
     left: 15,
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#000',
-    borderWidth: 4,
-    borderColor: '#FFF',
+    backgroundColor: colors.white,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   labelsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
-  label: { fontSize: 12, color: colors.textTertiary, fontWeight: '700' },
+  label: { fontSize: 13, color: colors.textSecondary, fontWeight: '800', textTransform: 'uppercase' },
   infoBox: { 
-    backgroundColor: '#F9FAFB', 
-    padding: 20, 
-    borderRadius: 16, 
+    backgroundColor: colors.bgCardSecondary, 
+    padding: 24, 
+    borderRadius: 24, 
     width: '100%',
     borderWidth: 1,
-    borderColor: '#F3F4F6'
+    borderColor: colors.borderGray,
+    marginTop: 20,
   },
-  infoTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
-  infoText: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-  button: { marginBottom: 20, borderRadius: 100 },
+  infoTitle: { fontSize: 15, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 },
+  infoText: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, fontWeight: '500' },
+  button: { marginBottom: 20, borderRadius: 100, height: 60 },
 });

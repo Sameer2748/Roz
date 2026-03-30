@@ -1,17 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
-import useAuthStore from '../../store/authStore';
 
 const { width } = Dimensions.get('window');
+const APP_ICON = require('../../../assets/icon_roz.png');
 
 export default function WelcomeScreen({ navigation }) {
-  const setUser = useAuthStore((s) => s.setUser);
-
   const handleStart = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('Gender');
@@ -22,20 +20,18 @@ export default function WelcomeScreen({ navigation }) {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <View style={styles.header}>
-            <View style={styles.logoBadge}>
-              <Ionicons name="sparkles" size={24} color={colors.white} />
-            </View>
+            <Image source={APP_ICON} style={styles.logoImage} />
             <Text style={styles.logo}>Roz</Text>
             <Text style={styles.tagline}>Precision Calorie Tracking</Text>
           </View>
 
           <View style={styles.heroContainer}>
             <View style={styles.heroCircle}>
-              <Ionicons name="nutrition" size={120} color={colors.ctaBackground} />
-              <View style={[styles.microBadge, { top: -20, right: -20, backgroundColor: '#FFD700' }]}>
+              <Ionicons name="nutrition" size={120} color={colors.white} />
+              <View style={[styles.microBadge, { top: -20, right: -20, backgroundColor: colors.accentGold }]}>
                 <Ionicons name="star" size={24} color={colors.white} />
               </View>
-              <View style={[styles.microBadge, { bottom: 20, left: -40, backgroundColor: '#4CD964' }]}>
+              <View style={[styles.microBadge, { bottom: 20, left: -40, backgroundColor: colors.accentGreen }]}>
                 <Ionicons name="leaf" size={24} color={colors.white} />
               </View>
             </View>
@@ -69,7 +65,7 @@ export default function WelcomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bgBase,
   },
   safeArea: {
     flex: 1,
@@ -84,29 +80,21 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
   },
-  logoBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
-    backgroundColor: colors.ctaBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
     marginBottom: 16,
-    shadowColor: colors.ctaBackground,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 10,
   },
   logo: {
     fontSize: 32,
-    fontWeight: '800',
+    fontWeight: '900',
     color: colors.textPrimary,
     letterSpacing: -1,
   },
   tagline: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 2,
@@ -121,7 +109,7 @@ const styles = StyleSheet.create({
     width: width * 0.6,
     height: width * 0.6,
     borderRadius: width * 0.3,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.bgCardSecondary,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -144,7 +132,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
@@ -155,11 +143,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 32,
+    fontWeight: '500',
   },
   mainButton: {
     width: '100%',
-    paddingVertical: 18,
-    borderRadius: 100,
+    height: 60,
+    borderRadius: 30,
   },
   signInLink: {
     marginTop: 20,
@@ -167,9 +156,10 @@ const styles = StyleSheet.create({
   signInText: {
     fontSize: 14,
     color: colors.textSecondary,
+    fontWeight: '600',
   },
   signInHighlight: {
-    color: colors.ctaBackground,
-    fontWeight: '700',
+    color: colors.white,
+    fontWeight: '800',
   },
 });

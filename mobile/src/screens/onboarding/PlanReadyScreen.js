@@ -8,7 +8,7 @@ import useUserStore from '../../store/userStore';
 import colors from '../../constants/colors';
 
 export default function PlanReadyScreen({ navigation }) {
-  const { onboardingData, dailyTarget, setProfile } = useUserStore();
+  const { onboardingData, dailyTarget } = useUserStore();
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -29,10 +29,18 @@ export default function PlanReadyScreen({ navigation }) {
     <OnboardingLayout
       showBack={true}
       onBack={() => navigation.goBack()}
+      progress={1.0}
+      footer={
+        <Button
+          title="Let's get started!"
+          onPress={handleContinue}
+          style={styles.button}
+        />
+      }
     >
       <View style={styles.center}>
         <View style={styles.checkIcon}>
-          <Ionicons name="checkmark-circle" size={32} color="#000" />
+          <Ionicons name="checkmark-circle" size={48} color={colors.white} />
         </View>
 
         <Text style={styles.title}>Congratulations{"\n"}your custom plan is ready!</Text>
@@ -47,57 +55,44 @@ export default function PlanReadyScreen({ navigation }) {
           <Text style={styles.cardSubtitle}>You can edit this anytime</Text>
 
           <View style={styles.grid}>
-            <NutrientCard label="Calories" value={plan.calories} unit="" icon="flame" color="#F87171" progress={0.7} />
-            <NutrientCard label="Carbs" value={plan.carbs_g} unit="g" icon="leaf" color="#FACC15" progress={0.65} />
-            <NutrientCard label="Protein" value={plan.protein_g} unit="g" icon="meat" color="#EB5757" progress={0.8} />
-            <NutrientCard label="Fats" value={plan.fat_g} unit="g" icon="water" color="#60A5FA" progress={0.5} />
+            <NutrientCard label="Calories" value={plan.calories} unit="" icon="flame" color={colors.accentOrange} />
+            <NutrientCard label="Carbs" value={plan.carbs_g} unit="g" icon="leaf" color={colors.accentGreen} />
+            <NutrientCard label="Protein" value={plan.protein_g} unit="g" icon="barbell" color={colors.accentPink} />
+            <NutrientCard label="Fats" value={plan.fat_g} unit="g" icon="water" color={colors.accentPurple} />
           </View>
         </View>
       </View>
-
-      <Button 
-        title="Let's get started!" 
-        onPress={handleContinue} 
-        style={styles.button}
-      />
     </OnboardingLayout>
   );
 }
 
-function NutrientCard({ label, value, unit, icon, color, progress }) {
+function NutrientCard({ label, value, unit, icon, color }) {
   return (
     <View style={styles.nCard}>
-       <View style={styles.nHeader}>
-          <Ionicons name={icon} size={14} color={color} />
-          <Text style={styles.nLabel}>{label}</Text>
-       </View>
-       <View style={styles.nCircleContainer}>
-          <View style={[styles.nCircle, { borderColor: '#F3F4F6' }]} />
-          {/* Simple semi-circle progress representation */}
-          <Text style={styles.nValue}>{value}<Text style={styles.nUnit}>{unit}</Text></Text>
-          <Ionicons name="pencil" size={10} color="#000" style={styles.editIcon} />
-       </View>
+      <View style={styles.nHeader}>
+        <Ionicons name={icon} size={14} color={color} />
+        <Text style={styles.nLabel}>{label}</Text>
+      </View>
+      <Text style={styles.nValue}>{value}<Text style={styles.nUnit}>{unit}</Text></Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', paddingTop: 20 },
-  checkIcon: { marginBottom: 12 },
+  checkIcon: { marginBottom: 16 },
   title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', lineHeight: 32, marginBottom: 20 },
-  goalLabel: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
-  goalBadge: { backgroundColor: '#F3F4F6', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, marginBottom: 30 },
-  goalText: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
-  card: { backgroundColor: '#F9FAFB', borderRadius: 24, padding: 20, width: '100%', marginBottom: 20 },
-  cardTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 4 },
-  cardSubtitle: { fontSize: 13, color: colors.textTertiary, marginBottom: 20 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  nCard: { width: '48%', backgroundColor: '#FFF', borderRadius: 16, padding: 16, gap: 12 },
+  goalLabel: { fontSize: 16, fontWeight: '600', color: colors.textSecondary, marginBottom: 8 },
+  goalBadge: { backgroundColor: colors.bgCardSecondary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24, marginBottom: 30, borderWidth: 1, borderColor: colors.borderGray },
+  goalText: { fontSize: 15, fontWeight: '800', color: colors.white },
+  card: { backgroundColor: colors.bgCardSecondary, borderRadius: 32, padding: 24, width: '100%', marginBottom: 20, borderWidth: 1, borderColor: colors.borderGray },
+  cardTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 },
+  cardSubtitle: { fontSize: 13, color: colors.textSecondary, marginBottom: 20, fontWeight: '600' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
+  nCard: { width: '47%', backgroundColor: colors.bgBase, borderRadius: 20, padding: 16, gap: 8, borderWidth: 1, borderColor: colors.borderGray },
   nHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  nLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-  nCircleContainer: { height: 70, justifyContent: 'center', alignItems: 'center', position: 'relative' },
-  nValue: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
-  nUnit: { fontSize: 12, fontWeight: '600' },
-  editIcon: { position: 'absolute', bottom: 0, right: 0 },
-  button: { marginBottom: 20, borderRadius: 100 },
+  nLabel: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
+  nValue: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
+  nUnit: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  button: { marginBottom: 20, borderRadius: 100, height: 60 },
 });

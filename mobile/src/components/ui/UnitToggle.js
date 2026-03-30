@@ -5,7 +5,6 @@ import colors from '../../constants/colors';
 import Animated, { 
   useAnimatedStyle, 
   withSpring, 
-  withTiming 
 } from 'react-native-reanimated';
 
 export default function UnitToggle({ units, activeUnit, onUnitChange, type = 'buttons' }) {
@@ -17,6 +16,10 @@ export default function UnitToggle({ units, activeUnit, onUnitChange, type = 'bu
     onUnitChange(next);
   };
 
+  const thumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: withSpring(isFirst ? 2 : 22, { damping: 15, stiffness: 120 }) }],
+  }));
+
   if (type === 'switch') {
     return (
       <TouchableOpacity 
@@ -25,7 +28,7 @@ export default function UnitToggle({ units, activeUnit, onUnitChange, type = 'bu
         activeOpacity={1}
       >
         <View style={styles.switchTrack}>
-          <View style={[styles.switchThumb, { transform: [{ translateX: isFirst ? 0 : 20 }] }]} />
+          <Animated.View style={[styles.switchThumb, thumbStyle]} />
         </View>
       </TouchableOpacity>
     );
@@ -55,40 +58,49 @@ export default function UnitToggle({ units, activeUnit, onUnitChange, type = 'bu
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
+    backgroundColor: colors.bgCardSecondary,
+    borderRadius: 14,
     padding: 4,
-    width: 140,
+    width: 160,
+    borderWidth: 1,
+    borderColor: colors.borderGray,
   },
   unitButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 10,
   },
   activeButton: {
     backgroundColor: colors.white,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3,
   },
-  unitText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
-  activeText: { color: colors.textPrimary },
+  unitText: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
+  activeText: { color: colors.black },
   switchContainer: {
-    width: 44,
-    height: 24,
+    width: 52,
+    height: 32,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 8,
   },
   switchTrack: {
-    width: 44,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#E5E7EB',
-    padding: 2,
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.bgCardSecondary,
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.borderGray,
   },
   switchThumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 1,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });

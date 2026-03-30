@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
   runOnJS,
   useDerivedValue
 } from 'react-native-reanimated';
@@ -46,7 +46,7 @@ export default function PlanCreationScreen({ navigation }) {
           pace: onboardingData.pace || 1.0,
           dietary_preference: onboardingData.dietary_preference || 'none',
         });
-        
+
         if (response.data.success) {
           setDailyTarget(response.data.data.plan);
         }
@@ -97,7 +97,7 @@ export default function PlanCreationScreen({ navigation }) {
                 <View key={item.key} style={styles.checkItem}>
                   <Text style={styles.itemBullet}>• {item.label}</Text>
                   <View style={[styles.iconBox, isDone && styles.doneIconBox]}>
-                     {isDone && <Ionicons name="checkmark-circle" size={18} color="#FFF" />}
+                    {isDone && <Ionicons name="checkmark-circle" size={18} color="#FFF" />}
                   </View>
                 </View>
               );
@@ -111,16 +111,16 @@ export default function PlanCreationScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', paddingTop: 40 },
-  logoText: { fontSize: 64, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  mainTitle: { fontSize: 24, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', lineHeight: 32, marginBottom: 32 },
-  progressBarWrapper: { width: '100%', height: 10, backgroundColor: '#E5E7EB', borderRadius: 5, overflow: 'hidden', marginBottom: 12 },
-  progressBarFill: { height: '100%', backgroundColor: '#F87171', borderRadius: 5 }, // Reddish like in screenshot
-  finalizingText: { fontSize: 13, color: colors.textTertiary, marginBottom: 40 },
-  checklistCard: { backgroundColor: '#000', borderRadius: 24, padding: 24, width: '100%' },
-  cardHeader: { color: '#9CA3AF', fontSize: 13, marginBottom: 16 },
-  list: { gap: 12 },
+  logoText: { fontSize: 64, fontWeight: '900', color: colors.textPrimary, marginBottom: 12 },
+  mainTitle: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', lineHeight: 32, marginBottom: 40 },
+  progressBarWrapper: { width: '100%', height: 12, backgroundColor: colors.bgCardSecondary, borderRadius: 6, overflow: 'hidden', marginBottom: 16, borderWidth: 1, borderColor: colors.borderGray },
+  progressBarFill: { height: '100%', backgroundColor: colors.white, borderRadius: 6 },
+  finalizingText: { fontSize: 13, color: colors.textSecondary, marginBottom: 40, fontWeight: '600' },
+  checklistCard: { backgroundColor: colors.bgCardSecondary, borderRadius: 32, padding: 24, width: '100%', borderWidth: 1, borderColor: colors.borderGray },
+  cardHeader: { color: colors.textSecondary, fontSize: 13, marginBottom: 16, fontWeight: '700' },
+  list: { gap: 14 },
   checkItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  itemBullet: { color: '#FFF', fontSize: 15, fontWeight: '600' },
+  itemBullet: { color: '#FFF', fontSize: 16, fontWeight: '700' },
   iconBox: { width: 22, height: 22 },
   doneIconBox: {},
 });

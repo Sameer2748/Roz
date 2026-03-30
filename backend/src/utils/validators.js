@@ -27,7 +27,7 @@ function validateGender(gender) {
 }
 
 function validateDietaryPreference(pref) {
-  return ['vegetarian', 'vegan', 'non_vegetarian', 'eggetarian', 'jain'].includes(pref);
+  return ['vegetarian', 'vegan', 'non_vegetarian', 'eggetarian', 'jain', 'classic', 'pescatarian'].includes(pref);
 }
 
 function validatePace(pace) {

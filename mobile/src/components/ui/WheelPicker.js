@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useCallback, memo } from 'react';
+import { View, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { 
   useSharedValue, 
@@ -8,27 +8,16 @@ import Animated, {
   interpolate, 
   Extrapolate,
   runOnJS,
-  useAnimatedRef,
 } from 'react-native-reanimated';
 import colors from '../../constants/colors';
 
 const ITEM_HEIGHT = 64;
 
-const PickerItem = React.memo(({ item, index, scrollY, suffix }) => {
+const PickerItem = memo(({ item, index, scrollY, suffix }) => {
   const animatedStyle = useAnimatedStyle(() => {
     const distance = Math.abs(scrollY.value - (index * ITEM_HEIGHT));
-    const scale = interpolate(
-      distance,
-      [0, ITEM_HEIGHT],
-      [1.1, 0.9],
-      Extrapolate.CLAMP
-    );
-    const opacity = interpolate(
-      distance,
-      [0, ITEM_HEIGHT * 2.5],
-      [1, 0.2],
-      Extrapolate.CLAMP
-    );
+    const scale = interpolate(distance, [0, ITEM_HEIGHT], [1.1, 0.9], Extrapolate.CLAMP);
+    const opacity = interpolate(distance, [0, ITEM_HEIGHT * 2.5], [1, 0.3], Extrapolate.CLAMP);
 
     return {
       transform: [{ scale }],
@@ -37,17 +26,11 @@ const PickerItem = React.memo(({ item, index, scrollY, suffix }) => {
   });
 
   const textStyle = useAnimatedStyle(() => {
-    const isActive = Math.round(scrollY.value / ITEM_HEIGHT) === index;
+    const distance = Math.abs(scrollY.value - (index * ITEM_HEIGHT));
+    const isActive = distance < ITEM_HEIGHT / 2;
     return {
-      color: isActive ? '#000000' : '#CCCCCC',
+      color: isActive ? colors.black : colors.textSecondary,
       fontWeight: isActive ? '800' : '600',
-    };
-  });
-
-  const suffixStyle = useAnimatedStyle(() => {
-    const isActive = Math.round(scrollY.value / ITEM_HEIGHT) === index;
-    return {
-      color: isActive ? '#000000' : '#CCCCCC',
     };
   });
 
@@ -58,7 +41,7 @@ const PickerItem = React.memo(({ item, index, scrollY, suffix }) => {
           {typeof item === 'object' ? item.label : item}
         </Animated.Text>
         {suffix ? (
-          <Animated.Text style={[wheelStyles.suffixText, suffixStyle]}>
+          <Animated.Text style={[wheelStyles.suffixText, textStyle]}>
             {suffix}
           </Animated.Text>
         ) : null}
@@ -71,24 +54,25 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
   const scrollY = useSharedValue(selectedIndex * ITEM_HEIGHT);
   const currentIndex = useSharedValue(selectedIndex);
   const flatListRef = useRef(null);
+  const isScrolling = useRef(false);
 
+  // Sync with prop changes (e.g. unit switch)
   useEffect(() => {
-    // Only scroll manually on mount or if external value changes while NOT scrolling
     if (flatListRef.current && currentIndex.value !== selectedIndex) {
-      setTimeout(() => {
-        flatListRef.current.scrollToOffset({ 
-          offset: selectedIndex * ITEM_HEIGHT, 
-          animated: false 
-        });
-        currentIndex.value = selectedIndex;
-        scrollY.value = selectedIndex * ITEM_HEIGHT;
-      }, 50);
+      const offset = selectedIndex * ITEM_HEIGHT;
+      flatListRef.current.scrollToOffset({ offset, animated: false });
+      currentIndex.value = selectedIndex;
+      scrollY.value = offset;
     }
-  }, [items]); // Only re-scroll when items list changes (e.g. unit switch)
+  }, [selectedIndex]);
 
-  const triggerHaptic = (index) => {
-    if (index !== selectedIndex) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  // Haptic feedback is ultra-light, can stay on JS thread.
+  const triggerHaptic = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleSelect = (index) => {
+    if (index >= 0 && index < items.length) {
       onSelect(index);
     }
   };
@@ -97,30 +81,31 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
       const index = Math.round(event.contentOffset.y / ITEM_HEIGHT);
-      if (index >= 0 && index < items.length && index !== currentIndex.value) {
+      if (index !== currentIndex.value) {
         currentIndex.value = index;
-        runOnJS(triggerHaptic)(index);
+        runOnJS(triggerHaptic)();
       }
+    },
+    onBeginDrag: () => {
+      isScrolling.current = true;
+    },
+    onEndDrag: (event) => {
+      isScrolling.current = false;
+      const index = Math.round(event.contentOffset.y / ITEM_HEIGHT);
+      runOnJS(handleSelect)(index);
+    },
+    onMomentumScrollEnd: (event) => {
+      const index = Math.round(event.contentOffset.y / ITEM_HEIGHT);
+      runOnJS(handleSelect)(index);
     },
   });
 
   const renderItem = useCallback(({ item, index }) => (
-    <PickerItem 
-      item={item} 
-      index={index} 
-      scrollY={scrollY} 
-      suffix={suffix} 
-    />
+    <PickerItem item={item} index={index} scrollY={scrollY} suffix={suffix} />
   ), [suffix]);
 
-  const containerStyle = [
-    { flex: 1 }, // Default to flexible if no width provided
-    wheelStyles.container,
-    style
-  ];
-
   return (
-    <View style={containerStyle}>
+    <View style={[{ flex: 1 }, wheelStyles.container, style]}>
       <View style={wheelStyles.indicator} />
       <Animated.FlatList
         ref={flatListRef}
@@ -130,7 +115,7 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingVertical: 110 }}
+        contentContainerStyle={{ paddingVertical: 108 }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         getItemLayout={(_, index) => ({
@@ -139,6 +124,9 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
           index,
         })}
         initialScrollIndex={selectedIndex}
+        removeClippedSubviews={true}
+        windowSize={3}
+        initialNumToRender={8}
         {...flatListProps}
       />
     </View>
@@ -146,28 +134,14 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
 }
 
 const wheelStyles = StyleSheet.create({
-  container: { height: 280, position: 'relative', overflow: 'hidden' }, // Removed flex: 1 from here
+  container: { height: 280, position: 'relative', overflow: 'hidden' },
   indicator: {
     position: 'absolute', top: '50%', left: 0, right: 0,
-    height: 64, marginTop: -32,
-    backgroundColor: '#F3F4F6', borderRadius: 12, zIndex: -1,
+    height: ITEM_HEIGHT, marginTop: -ITEM_HEIGHT / 2,
+    backgroundColor: colors.white, borderRadius: 16, zIndex: -1,
   },
-  item: { height: 64, justifyContent: 'center', alignItems: 'center' },
-  textContainer: { 
-    flexDirection: 'row', 
-    alignItems: 'baseline', // Baseline looks better for units
-    justifyContent: 'center',
-    width: '100%',
-    paddingHorizontal: 4,
-  },
-  itemText: { 
-    fontSize: 24, 
-    textAlign: 'center',
-  },
-  suffixText: { 
-    fontSize: 14, 
-    marginLeft: 2, 
-    fontWeight: '600',
-    marginBottom: 2, // Slight lift to match baseline visually
-  },
+  item: { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center' },
+  textContainer: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', width: '100%', paddingHorizontal: 4 },
+  itemText: { fontSize: 24, textAlign: 'center' },
+  suffixText: { fontSize: 14, marginLeft: 2, fontWeight: '700', marginBottom: 2 },
 });

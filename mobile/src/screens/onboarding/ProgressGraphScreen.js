@@ -9,38 +9,51 @@ const { width } = Dimensions.get('window');
 
 export default function ProgressGraphScreen({ navigation }) {
   const data = {
-    labels: ['1', '2', '3', '4', '5'],
+    labels: ['', '', '', '', ''],
     datasets: [
       {
-        data: [100, 85, 75, 68, 62],
-        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-        strokeWidth: 4,
+        data: [100, 90, 70, 95, 105], // Traditional: Yo-yo (Drawn first, behind)
+        color: (opacity = 1) => `rgba(139, 92, 246, ${opacity * 0.4})`, // Purple
+        strokeWidth: 2,
       },
       {
-        data: [100, 95, 92, 90, 88], // Slower comparison
-        color: (opacity = 1) => `rgba(200, 200, 200, ${opacity})`,
-        strokeWidth: 2,
+        data: [100, 95, 75, 45, 35], // Roz: Steady decline (Drawn second, on top)
+        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, 
+        strokeWidth: 4,
       }
     ],
   };
 
   const chartConfig = {
-    backgroundColor: '#F9FAFB',
-    backgroundGradientFrom: '#F9FAFB',
-    backgroundGradientTo: '#F9FAFB',
+    backgroundColor: colors.bgCardSecondary,
+    backgroundGradientFrom: colors.bgCardSecondary,
+    backgroundGradientTo: colors.bgCardSecondary,
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(153, 153, 153, ${opacity})`,
-    propsForDots: { r: '0' },
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+    propsForDots: {
+      r: '0', 
+    },
+    useShadowColorFromDataset: false,
+    propsForBackgroundLines: {
+      strokeDasharray: '5, 5', 
+      stroke: 'rgba(255,255,255,0.05)',
+    },
+    fillShadowGradient: colors.white,
+    fillShadowGradientOpacity: 0.05,
   };
 
   return (
     <OnboardingLayout
       title={`Roz creates\nlong-term results.`}
       onBack={() => navigation.goBack()}
-      progress={0.25}
+      progress={0.2}
       footer={
-        <Button title="Continue" onPress={() => navigation.navigate('HeightWeight')} style={styles.button} />
+        <Button 
+           title="Continue" 
+           onPress={() => navigation.navigate('HeightWeight')} 
+           style={styles.button} 
+        />
       }
     >
       <View style={styles.content}>
@@ -50,33 +63,53 @@ export default function ProgressGraphScreen({ navigation }) {
           <View style={styles.chartWrapper}>
             <LineChart
               data={data}
-              width={width - 50}
-              height={180}
+              width={width - 64} 
+              height={200}
               chartConfig={chartConfig}
               bezier
-              withInnerLines={false}
+              withInnerLines={true}
               withOuterLines={false}
               withHorizontalLabels={false}
               withVerticalLabels={false}
               style={styles.chart}
+              segments={2}
             />
-            {/* Legend marker */}
-            <View style={styles.markerContainer}>
-              <View style={styles.markerBadge}>
-                <View style={styles.dot} />
-                <Text style={styles.markerText}>Roz</Text>
-              </View>
+            
+            {/* Start point dot - positioned specifically to avoid overflow */}
+            <View style={[styles.endpointDot, { top: 34, left: 0 }]}>
+               <View style={styles.dotInner} />
+            </View>
+
+            {/* End point dot - positioned specifically for Roz line end */}
+            <View style={[styles.endpointDot, { bottom: 18, right: 0 }]}>
+               <View style={styles.dotInner} />
+            </View>
+
+            {/* Labels overlay */}
+            <View style={[styles.labelPos, { top: 85, right: 10 }]}>
+              <Text style={styles.tradLabel}>Traditional diet</Text>
+            </View>
+
+            <View style={styles.rozLabelRow}>
+               <View style={styles.rozIconCircle}>
+                 <Text style={{ fontSize: 8 }}>🛡️</Text>
+               </View>
+               <Text style={styles.rozText}>Roz</Text>
+               <View style={styles.weightTag}>
+                 <Text style={styles.weightTagText}>Weight</Text>
+               </View>
             </View>
           </View>
 
-          <View style={styles.chartBottom}>
-            <Text style={styles.monthLabel}>Month 1</Text>
+          <View style={styles.xAxis}>
+            <Text style={styles.xLabel}>Month 1</Text>
+            <Text style={styles.xLabel}>Month 6</Text>
           </View>
         </View>
 
-        <View style={styles.footer}>
-           <Text style={styles.percentageText}>
-             <Text style={styles.highlight}>80% of Roz users</Text> lose weight in their first month.
+        <View style={styles.footerTextContainer}>
+           <Text style={styles.statText}>
+             <Text style={styles.boldWhite}>80% of Roz users</Text> maintain their{'\n'}weight loss even 6 months later.
            </Text>
         </View>
       </View>
@@ -87,36 +120,49 @@ export default function ProgressGraphScreen({ navigation }) {
 const styles = StyleSheet.create({
   content: { marginTop: 20 },
   chartCard: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.bgCardSecondary,
     borderRadius: 32,
     padding: 24,
-    paddingRight: 0, // Chart has internal padding
     width: '100%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  chartTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginBottom: 10 },
-  chartWrapper: { position: 'relative' },
-  chart: { paddingRight: 0, marginLeft: -20 },
-  markerContainer: { 
-    position: 'absolute',
-    top: 80,
-    left: 40,
-  },
-  markerBadge: {
-    flexDirection: 'row',
+  chartTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginBottom: 20 },
+  chartWrapper: { position: 'relative', width: '100%' },
+  chart: { paddingRight: 0, marginLeft: -24 },
+  labelPos: { position: 'absolute' },
+  tradLabel: { color: colors.textSecondary, fontSize: 13, fontWeight: '700' },
+  rozLabelRow: { 
+    position: 'absolute', 
+    bottom: 18, 
+    left: 0, 
+    flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2,
+    gap: 6
   },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'black', marginRight: 4 },
-  markerText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
-  chartBottom: { marginTop: 10, width: '100%', paddingRight: 24, alignItems: 'center' },
-  monthLabel: { fontSize: 13, color: colors.textTertiary, fontWeight: '700' },
-  footer: { marginTop: 40, width: '100%', paddingHorizontal: 20 },
-  percentageText: { fontSize: 18, color: colors.textSecondary, textAlign: 'center', lineHeight: 26 },
-  highlight: { color: colors.textPrimary, fontWeight: '800' },
-  spacer: { flex: 1, minHeight: 40 },
-  button: { marginBottom: 20, borderRadius: 100 },
+  rozIconCircle: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.white, justifyContent: 'center', alignItems: 'center' },
+  rozText: { color: colors.white, fontSize: 13, fontWeight: '800' },
+  weightTag: { backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  weightTagText: { color: colors.textSecondary, fontSize: 9, fontWeight: '800', textTransform: 'uppercase' },
+  endpointDot: { 
+    position: 'absolute', 
+    width: 14, 
+    height: 14, 
+    borderRadius: 7, 
+    backgroundColor: colors.white, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  dotInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.bgCardSecondary },
+  xAxis: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginTop: 10
+  },
+  xLabel: { fontSize: 14, color: colors.textPrimary, fontWeight: '800' },
+  footerTextContainer: { marginTop: 40, paddingHorizontal: 20 },
+  statText: { fontSize: 18, color: colors.textSecondary, textAlign: 'center', lineHeight: 26, fontWeight: '500' },
+  boldWhite: { color: colors.textPrimary, fontWeight: '800' },
+  button: { marginBottom: 20, borderRadius: 100, height: 60 },
 });

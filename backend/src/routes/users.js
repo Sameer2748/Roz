@@ -13,6 +13,12 @@ router.get('/me', authenticate, async (req, res, next) => {
     const userId = req.user.id;
 
     const userResult = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    const user = userResult.rows[0];
+    if (user && user.avatar_url && !user.avatar_url.startsWith('http')) {
+      const { getImageUrl } = require('../config/s3');
+      user.avatar_url = await getImageUrl(user.avatar_url);
+    }
+
     const profileResult = await db.query('SELECT * FROM user_profiles WHERE user_id = $1', [userId]);
     const targetResult = await db.query(
       'SELECT * FROM daily_targets WHERE user_id = $1 ORDER BY effective_from DESC LIMIT 1',
@@ -23,7 +29,7 @@ router.get('/me', authenticate, async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        user: userResult.rows[0],
+        user,
         profile: profileResult.rows[0] || null,
         daily_target: targetResult.rows[0] || null,
         streak,
@@ -42,6 +48,7 @@ router.put('/profile', authenticate, async (req, res, next) => {
       age, gender, height_cm, weight_kg, target_weight_kg,
       activity_level, goal, pace, dietary_preference,
       allergies, meals_per_day, country_code, phone_number,
+      name, avatar_url,
     } = req.body;
 
     // Validate fields if provided
@@ -62,7 +69,7 @@ router.put('/profile', authenticate, async (req, res, next) => {
     }
 
     // Update user fields if provided
-    if (country_code || phone_number) {
+    if (country_code || phone_number || name || avatar_url) {
       const uFields = [];
       const uValues = [];
       let uIdx = 1;
@@ -74,6 +81,14 @@ router.put('/profile', authenticate, async (req, res, next) => {
       if (phone_number) {
         uFields.push(`phone_number = $${uIdx++}`);
         uValues.push(phone_number);
+      }
+      if (name) {
+        uFields.push(`name = $${uIdx++}`);
+        uValues.push(name);
+      }
+      if (avatar_url) {
+        uFields.push(`avatar_url = $${uIdx++}`);
+        uValues.push(avatar_url);
       }
       
       uValues.push(userId);
@@ -218,6 +233,38 @@ router.post('/onboarding', authenticate, async (req, res, next) => {
       data: {
         plan,
         message: 'AI Personalized Nutrition Plan Generated Successfully!',
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const multer = require('multer');
+const { uploadImage, getImageUrl } = require('../config/s3');
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+// POST /users/avatar
+router.post('/avatar', authenticate, upload.single('avatar'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const imageKey = await uploadImage(req.file.buffer, req.file.mimetype);
+    const imageUrl = await getImageUrl(imageKey);
+
+    // Also update user record immediately
+    await db.query('UPDATE users SET avatar_url = $1, updated_at = NOW() WHERE id = $2', [imageKey, req.user.id]);
+
+    res.json({
+      success: true,
+      data: {
+        avatar_url: imageUrl,
+        storage_key: imageKey,
       },
     });
   } catch (err) {
