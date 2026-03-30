@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "Roz",
+    "slug": "roz-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.roz.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Roz needs camera access to scan your meals",
+        "NSPhotoLibraryUsageDescription": "Roz needs photo library access to analyze food images"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.roz.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Roz to use your camera to identify meals.",
+          "microphonePermission": "Allow Roz to access microphone (not used)."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Roz to access your gallery to analyze food photos."
+        }
+      ],
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1C1C1C"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "741e8ccc-58f9-47e6-bf9c-8c8d1294c551"
+      }
+    },
+    "owner": "sameer27"
+  }
+}
