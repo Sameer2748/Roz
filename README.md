@@ -1,4 +1,7 @@
-# Roz 🛡️🥗⚡
+<div align="center">
+  <img src="mobile/assets/icon.png" width="80" height="80" style="border-radius: 20px" />
+  <h1>Roz 🛡️🥗⚡</h1>
+</div>
 
 Roz is a premium, AI-powered calorie tracking application that understands your food in real-time. Built with a high-end **Balanced Dark Theme**, it focuses on precision, speed, and community.
 
