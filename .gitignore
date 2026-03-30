@@ -1,0 +1,52 @@
+# Node modules
+**/node_modules/
+
+# Logs
+**/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+**/.env
+**/.env.local
+**/.env.*.local
+**/env
+
+# MacOS
+.DS_Store
+**/.DS_Store
+
+# Expo / React Native
+**/.expo/
+**/dist/
+**/web-build/
+**/.eas/
+**.apk
+**.aab
+**.ipa
+*.jks
+*.keystore
+
+# Android / iOS build folders (if managed/ejected)
+**/android/app/build/
+**/android/build/
+**/ios/Pods/
+**/ios/build/
+
+# Backend specific
+**/uploads/
+**/brain/
+backend/src/config/keys.js
+!backend/src/config/db.js
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary / OS files
+**/tmp/
+/Users/manmohan/.gemini/antigravity/brain/
