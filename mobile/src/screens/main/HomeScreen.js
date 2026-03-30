@@ -147,6 +147,8 @@ export default function HomeScreen({ navigation, route }) {
   const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedDate, setSelectedDate] = useState(formatLocalDate(new Date()));
+  const [waterTotal, setWaterTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
   const lastFetchRef = useRef(null);
 
   const fetchData = useCallback(async (targetDate = selectedDate, force = false) => {
@@ -155,11 +157,13 @@ export default function HomeScreen({ navigation, route }) {
     if (lastFetchRef.current === fetchKey && !force) return;
     lastFetchRef.current = fetchKey;
 
+    setLoading(true);
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const [userRes, logsRes] = await Promise.all([
+      const [userRes, logsRes, waterRes] = await Promise.all([
         api.get('/users/me'),
         api.get(`/logs/day?date=${targetDate}&tz=${tz}`),
+        api.get(`/water/today?date=${targetDate}`),
       ]);
 
       const data = userRes.data.data;
@@ -167,10 +171,27 @@ export default function HomeScreen({ navigation, route }) {
       setDailyTarget(data.daily_target);
       setStreak(userRes.data.data.streak || streak);
       setTodayLogs(logsRes.data.data.meals, logsRes.data.data.totals);
+      setWaterTotal(waterRes.data.data.total_ml || 0);
     } catch (err) {
       showToast('Connection error', 'error');
+    } finally {
+      setLoading(false);
     }
   }, [selectedDate, setDailyTarget, setProfile, setStreak, setTodayLogs, showToast]);
+
+  const handleAddWater = async (increment = 250) => {
+    if (increment < 0 && waterTotal <= 0) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Optimistic update
+    setWaterTotal(prev => Math.max(0, prev + increment));
+    try {
+      await api.post('/water', { amount_ml: increment, date: selectedDate });
+      if (increment > 0) showToast(`+${increment}ml added`, 'success');
+    } catch (err) {
+      showToast('Log failed', 'error');
+      setWaterTotal(prev => Math.max(0, prev - increment));
+    }
+  };
 
   // Fetch data whenever selectedDate changes (handles date selection from calendar)
   useEffect(() => {
@@ -284,71 +305,125 @@ export default function HomeScreen({ navigation, route }) {
         >
           {/* Main Dashboard Carousel */}
           <View style={styles.carouselWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              onScroll={onScroll}
-              scrollEventThrottle={16}
-              snapToInterval={SNAP_INTERVAL}
-              snapToAlignment="start"
-              decelerationRate="fast"
-              contentContainerStyle={styles.carouselContent}
-            >
-              {/* PAGE 1: Calories + Primary Macros */}
-              <View style={[styles.carouselPage, { width: PAGE_WIDTH }]}>
-                <View style={styles.mainCard}>
-                  <View style={styles.mainCardLeft}>
-                    <Text style={styles.mainCalories}>
-                       {Math.max(0, Math.round(calMax - calCount))} 
-                       <Text style={styles.totalCalText}> kcal</Text>
-                    </Text>
-                    <Text style={styles.mainLabel}>Calories left</Text>
-                  </View>
-                  <View style={styles.bigRingContainer}>
-                     <View style={styles.bigRingTrack} />
-                     <View style={[styles.bigRingFill, { 
-                       borderLeftColor: '#FFF', 
-                       borderTopColor: '#FFF',
-                       borderBottomColor: calPct > 0.5 ? '#FFF' : 'transparent',
-                       borderRightColor: calPct > 0.75 ? '#FFF' : 'transparent',
-                       opacity: calPct > 0 ? 1 : 0
-                     }]} />
-                     <View style={styles.iconCapsule}>
-                        <Ionicons name="flame" size={24} color="#FFF" />
-                     </View>
-                  </View>
+            {loading ? (
+              <View style={styles.skeletonContainer}>
+                <View style={[styles.mainCard, styles.skeletonCard]}>
+                   <View style={styles.mainCardLeft}>
+                      <ShimmerPlaceholder style={styles.skeletonTextLarge} />
+                      <ShimmerPlaceholder style={styles.skeletonTextSmall} />
+                   </View>
+                   <View style={styles.bigRingContainer}>
+                      <ShimmerPlaceholder style={[styles.bigRingTrack, { borderColor: 'transparent' }]} />
+                   </View>
                 </View>
-
                 <View style={styles.macroRow}>
-                  <MacroMiniCard label="Protein" val={Math.round(consumed.protein_g)} max={target.protein_g} icon="food-drumstick" color={colors.accentGreen} />
-                  <MacroMiniCard label="Carbs" val={Math.round(consumed.carbs_g)} max={target.carbs_g} icon="leaf" color={colors.accentGold} />
-                  <MacroMiniCard label="Fats" val={Math.round(consumed.fat_g)} max={target.fat_g} icon="opacity" color={colors.accentPink} />
+                   <View style={[styles.miniCard, styles.skeletonCard]}>
+                      <ShimmerPlaceholder style={{ height: 16, width: '60%', borderRadius: 4, marginBottom: 8 }} />
+                      <ShimmerPlaceholder style={{ height: 10, width: '40%', borderRadius: 4, marginBottom: 20 }} />
+                      <View style={{ alignItems: 'center' }}>
+                         <ShimmerPlaceholder style={{ width: 50, height: 50, borderRadius: 25 }} />
+                      </View>
+                   </View>
+                   <View style={[styles.miniCard, styles.skeletonCard]}>
+                      <ShimmerPlaceholder style={{ height: 16, width: '60%', borderRadius: 4, marginBottom: 8 }} />
+                      <ShimmerPlaceholder style={{ height: 10, width: '40%', borderRadius: 4, marginBottom: 20 }} />
+                      <View style={{ alignItems: 'center' }}>
+                         <ShimmerPlaceholder style={{ width: 50, height: 50, borderRadius: 25 }} />
+                      </View>
+                   </View>
+                   <View style={[styles.miniCard, styles.skeletonCard]}>
+                      <ShimmerPlaceholder style={{ height: 16, width: '60%', borderRadius: 4, marginBottom: 8 }} />
+                      <ShimmerPlaceholder style={{ height: 10, width: '40%', borderRadius: 4, marginBottom: 20 }} />
+                      <View style={{ alignItems: 'center' }}>
+                         <ShimmerPlaceholder style={{ width: 50, height: 50, borderRadius: 25 }} />
+                      </View>
+                   </View>
                 </View>
               </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                snapToInterval={SNAP_INTERVAL}
+                snapToAlignment="start"
+                decelerationRate="fast"
+                contentContainerStyle={styles.carouselContent}
+              >
+                {/* PAGE 1: Calories + Primary Macros */}
+                <View style={[styles.carouselPage, { width: PAGE_WIDTH }]}>
+                  <View style={styles.mainCard}>
+                    <View style={styles.mainCardLeft}>
+                      <Text style={styles.mainCalories}>
+                         {Math.max(0, Math.round(calMax - calCount))} 
+                         <Text style={styles.totalCalText}> kcal</Text>
+                      </Text>
+                      <Text style={styles.mainLabel}>Calories left</Text>
+                    </View>
+                    <View style={styles.bigRingContainer}>
+                       <View style={styles.bigRingTrack} />
+                       <View style={[styles.bigRingFill, { 
+                         borderLeftColor: '#FFF', 
+                         borderTopColor: '#FFF',
+                         borderBottomColor: calPct > 0.5 ? '#FFF' : 'transparent',
+                         borderRightColor: calPct > 0.75 ? '#FFF' : 'transparent',
+                         opacity: calPct > 0 ? 1 : 0
+                       }]} />
+                       <View style={styles.iconCapsule}>
+                          <Ionicons name="flame" size={24} color="#FFF" />
+                       </View>
+                    </View>
+                  </View>
 
-              {/* PAGE 2: Secondary Macros + Health Score */}
-              <View style={[styles.carouselPage, { width: PAGE_WIDTH }]}>
-                <View style={styles.macroRow}>
-                  <MacroMiniCard label="Fiber" val={Math.round(consumed.fiber_g || 0)} max={38} icon="blur" color={colors.accentPurple} />
-                  <MacroMiniCard label="Sugar" val={Math.round(consumed.sugar_g || 0)} max={90} icon="shimmer" color={colors.accentPink} />
-                  <MacroMiniCard label="Sodium" val={Math.round(consumed.sodium_mg || 0)} max={2300} icon="shaker-outline" color={colors.accentGold} />
+                  <View style={styles.macroRow}>
+                    <MacroMiniCard label="Protein" val={Math.round(consumed.protein_g)} max={target.protein_g} icon="food-drumstick" color={colors.accentGreen} />
+                    <MacroMiniCard label="Carbs" val={Math.round(consumed.carbs_g)} max={target.carbs_g} icon="leaf" color={colors.accentGold} />
+                    <MacroMiniCard label="Fats" val={Math.round(consumed.fat_g)} max={target.fat_g} icon="opacity" color={colors.accentPink} />
+                  </View>
                 </View>
 
-                <View style={styles.healthCard}>
-                  <View style={styles.healthHeader}>
-                    <Text style={styles.healthTitle}>Health score</Text>
-                    <Text style={styles.healthScore}>6/10</Text>
+                {/* PAGE 2: Secondary Macros + Water */}
+                <View style={[styles.carouselPage, { width: PAGE_WIDTH }]}>
+                  <View style={styles.macroRow}>
+                    <MacroMiniCard label="Fiber" val={Math.round(consumed.fiber_g || 0)} max={38} icon="blur" color={colors.accentPurple} />
+                    <MacroMiniCard label="Sugar" val={Math.round(consumed.sugar_g || 0)} max={90} icon="shimmer" color={colors.accentPink} />
+                    <MacroMiniCard label="Sodium" val={Math.round(consumed.sodium_mg || 0)} max={2300} icon="shaker-outline" color={colors.accentGold} />
                   </View>
-                  <View style={styles.healthProgressWrap}>
-                    <View style={styles.healthProgressBar} />
-                    <View style={[styles.healthProgressFill, { width: '60%' }]} />
+
+                  <View style={styles.waterCard}>
+                    <View style={styles.waterLeft}>
+                      <View style={styles.waterIconBg}>
+                         <MaterialCommunityIcons name="cup-water" size={28} color="#4A90E2" />
+                      </View>
+                      <View style={styles.waterLabels}>
+                        <Text style={styles.waterTitle}>Water</Text>
+                        <View style={styles.waterStatsRow}>
+                          <Text style={styles.waterTotalText}>{waterTotal} ml</Text>
+                          <Ionicons name="settings-sharp" size={12} color="rgba(255,255,255,0.2)" style={{ marginLeft: 6 }} />
+                        </View>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.waterControls}>
+                      <TouchableOpacity 
+                        style={[styles.waterCircleBtn, waterTotal <= 0 && { opacity: 0.3 }]} 
+                        onPress={() => handleAddWater(-250)}
+                        disabled={waterTotal <= 0}
+                      >
+                         <Ionicons name="remove" size={24} color="#FFF" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[styles.waterCircleBtn, styles.waterPlusBtn]} 
+                        onPress={() => handleAddWater(250)}
+                      >
+                         <Ionicons name="add" size={24} color="#000" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <Text style={styles.healthDesc}>
-                    Carbs and fat are on track. You’re low in calories and protein, which can slow weight loss and impact muscle retention.
-                  </Text>
                 </View>
-              </View>
-            </ScrollView>
+              </ScrollView>
+            )}
 
             <View style={styles.paginationDots}>
               <View style={[styles.dot, currentPage === 0 && styles.activeDot]} />
@@ -357,96 +432,117 @@ export default function HomeScreen({ navigation, route }) {
           </View>
 
           <Text style={styles.sectionTitle}>
-             {selectedDate === new Date().toISOString().split('T')[0] ? 'Recently uploaded' : `Logs for ${new Date(selectedDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}`}
+             {selectedDate === formatLocalDate(new Date()) ? 'Recently uploaded' : `Logs for ${new Date(selectedDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}`}
           </Text>
 
           <View style={styles.logsList}>
-            {pendingLogs.map((item) => (
-              <View key={item.id} style={[styles.logRow, { opacity: 0.7 }]}>
-                <View style={styles.pendingImageWrap}>
-                   <ShimmerPlaceholder style={styles.logImage} />
-                  <View style={styles.loaderOverlay}>
-                    <ActivityIndicator size="small" color="#FFF" />
+            {loading ? (
+              <View style={{ gap: 12 }}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={[styles.logRow, styles.skeletonCard, { borderRadius: 32 }]}>
+                    <ShimmerPlaceholder style={styles.logImage} />
+                    <View style={styles.logInfo}>
+                       <ShimmerPlaceholder style={{ height: 18, width: '70%', borderRadius: 4, marginBottom: 8 }} />
+                       <ShimmerPlaceholder style={{ height: 12, width: '30%', borderRadius: 4, marginBottom: 12 }} />
+                       <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <ShimmerPlaceholder style={{ height: 14, width: 60, borderRadius: 4 }} />
+                          <ShimmerPlaceholder style={{ height: 14, width: 40, borderRadius: 4 }} />
+                          <ShimmerPlaceholder style={{ height: 14, width: 40, borderRadius: 4 }} />
+                       </View>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.logInfo}>
-                  <Text style={styles.pendingTitle}>Analyzing meal...</Text>
-                  <Text style={styles.pendingSub}>{item.meal_type.toUpperCase()}</Text>
-                  <View style={styles.shimmerBar} />
-                </View>
-              </View>
-            ))}
-
-            {Object.values(todayLogs).flat().length === 0 && pendingLogs.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Ionicons name="restaurant-outline" size={48} color="#444" />
-                <Text style={styles.emptyTitle}>No logs for this day</Text>
-                <Text style={styles.emptySub}>Track your nutrition by scanning meals</Text>
+                ))}
               </View>
             ) : (
-              Object.keys(todayLogs).map((type) =>
-                todayLogs[type].map((item) => (
-                  <View key={item.id} style={styles.swipeWrapper}>
-                    <Swipeable
-                      friction={2}
-                      rightThreshold={40}
-                      overshootRight={false}
-                      renderRightActions={() => (
-                        <RectButton
-                          style={styles.deleteAction}
-                          onPress={() => {
-                            handleDeleteLog(item.id, type);
-                          }}
-                        >
-                          <Ionicons name="trash" size={24} color="#FF453A" />
-                          <Text style={styles.deleteActionText}>Delete</Text>
-                        </RectButton>
-                      )}
-                    >
-                      <TouchableOpacity
-                        style={styles.logRow}
-                        activeOpacity={0.9}
-                        onPress={() => navigation.navigate('FoodDetail', { log: item })}
-                      >
-                        {item.image_url ? (
-                          <ShimmerImage uri={item.image_url} style={styles.logImage} />
-                        ) : (
-                          <View style={[styles.logImage, { backgroundColor: '#2C2C2E', justifyContent: 'center', alignItems: 'center' }]}>
-                            <Ionicons name="restaurant" size={32} color="#666" />
-                          </View>
-                        )}
-
-                        <View style={styles.logInfo}>
-                          <Text style={styles.logTime}>{new Date(item.logged_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                          <Text style={styles.logName} numberOfLines={1}>{item.food_name}</Text>
-
-                          <View style={styles.logStats}>
-                            <View style={styles.logCalRow}>
-                              <Ionicons name="flame" size={16} color={colors.accentOrange} />
-                              <Text style={styles.logCalText}>{Math.round(item.calories)} calories</Text>
-                            </View>
-
-                            <View style={styles.logMacroRow}>
-                              <View style={styles.miniMacro}>
-                                <MaterialCommunityIcons name="food-drumstick" size={14} color={colors.accentGreen} />
-                                <Text style={styles.miniMacroText}>{Math.round(item.protein_g)}g</Text>
-                              </View>
-                              <View style={styles.miniMacro}>
-                                <MaterialCommunityIcons name="leaf" size={14} color={colors.accentGold} />
-                                <Text style={styles.miniMacroText}>{Math.round(item.carbs_g)}g</Text>
-                              </View>
-                              <View style={styles.miniMacro}>
-                                <MaterialCommunityIcons name="opacity" size={14} color={colors.accentPink} />
-                                <Text style={styles.miniMacroText}>{Math.round(item.fat_g)}g</Text>
-                              </View>
-                            </View>
-                          </View>
+              <>
+                {pendingLogs.map((item) => (
+                  <View key={item.id} style={[styles.logRow, { opacity: 0.7 }]}>
+                     <View style={styles.pendingImageWrap}>
+                        <View style={[styles.logImage, { backgroundColor: 'rgba(255,255,255,0.05)' }]} />
+                        <View style={styles.loaderOverlay}>
+                          <ActivityIndicator size="small" color="#FFF" />
                         </View>
-                      </TouchableOpacity>
-                    </Swipeable>
+                     </View>
+                     <View style={styles.logInfo}>
+                        <Text style={styles.pendingTitle}>Analyzing meal...</Text>
+                        <Text style={styles.pendingSub}>{item.meal_type.toUpperCase()}</Text>
+                        <View style={styles.shimmerBar} />
+                     </View>
                   </View>
-                ))
-              )
+                ))}
+
+                {Object.values(todayLogs).flat().length === 0 && pendingLogs.length === 0 ? (
+                  <View style={styles.emptyState}>
+                    <Ionicons name="restaurant-outline" size={48} color="#444" />
+                    <Text style={styles.emptyTitle}>No logs for this day</Text>
+                    <Text style={styles.emptySub}>Track your nutrition by scanning meals</Text>
+                  </View>
+                ) : (
+                  Object.keys(todayLogs).map((type) =>
+                    todayLogs[type].map((item) => (
+                      <View key={item.id} style={styles.swipeWrapper}>
+                        <Swipeable
+                          friction={2}
+                          rightThreshold={40}
+                          overshootRight={false}
+                          renderRightActions={() => (
+                            <RectButton
+                              style={styles.deleteAction}
+                              onPress={() => {
+                                handleDeleteLog(item.id, type);
+                              }}
+                            >
+                              <Ionicons name="trash" size={24} color="#FF453A" />
+                              <Text style={styles.deleteActionText}>Delete</Text>
+                            </RectButton>
+                          )}
+                        >
+                          <TouchableOpacity
+                            style={styles.logRow}
+                            activeOpacity={0.9}
+                            onPress={() => navigation.navigate('FoodDetail', { log: item })}
+                          >
+                            {item.image_url ? (
+                              <ShimmerImage uri={item.image_url} style={styles.logImage} />
+                            ) : (
+                              <View style={[styles.logImage, { backgroundColor: '#2C2C2E', justifyContent: 'center', alignItems: 'center' }]}>
+                                <Ionicons name="restaurant" size={32} color="#666" />
+                              </View>
+                            )}
+
+                            <View style={styles.logInfo}>
+                              <Text style={styles.logTime}>{new Date(item.logged_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                              <Text style={styles.logName} numberOfLines={1}>{item.food_name}</Text>
+
+                              <View style={styles.logStats}>
+                                <View style={styles.logCalRow}>
+                                  <Ionicons name="flame" size={16} color={colors.accentOrange} />
+                                  <Text style={styles.logCalText}>{Math.round(item.calories)} calories</Text>
+                                </View>
+
+                                <View style={styles.logMacroRow}>
+                                  <View style={styles.miniMacro}>
+                                    <MaterialCommunityIcons name="food-drumstick" size={14} color={colors.accentGreen} />
+                                    <Text style={styles.miniMacroText}>{Math.round(item.protein_g)}g</Text>
+                                  </View>
+                                  <View style={styles.miniMacro}>
+                                    <MaterialCommunityIcons name="leaf" size={14} color={colors.accentGold} />
+                                    <Text style={styles.miniMacroText}>{Math.round(item.carbs_g)}g</Text>
+                                  </View>
+                                  <View style={styles.miniMacro}>
+                                    <MaterialCommunityIcons name="opacity" size={14} color={colors.accentPink} />
+                                    <Text style={styles.miniMacroText}>{Math.round(item.fat_g)}g</Text>
+                                  </View>
+                                </View>
+                              </View>
+                            </View>
+                          </TouchableOpacity>
+                        </Swipeable>
+                      </View>
+                    ))
+                  )
+                )}
+              </>
             )}
           </View>
         </ScrollView>
@@ -466,12 +562,12 @@ function MacroMiniCard({ label, val, max, icon, color }) {
       <View style={styles.miniProgressContainer}>
          <View style={[styles.miniProgressRing, { borderColor: 'rgba(255,255,255,0.05)' }]} />
          <View style={[styles.miniProgressRingActive, { 
-           borderColor: color, 
-           borderBottomColor: pct > 0.5 ? color : 'transparent',
-           borderRightColor: pct > 0.75 ? color : 'transparent',
-           borderLeftColor: color,
-           borderTopColor: color,
-           opacity: pct > 0 ? 1 : 0
+            borderColor: color, 
+            borderBottomColor: pct > 0.5 ? color : 'transparent',
+            borderRightColor: pct > 0.75 ? color : 'transparent',
+            borderLeftColor: color,
+            borderTopColor: color,
+            opacity: pct > 0 ? 1 : 0
          }]} />
          <MaterialCommunityIcons name={icon} size={22} color={color} />
       </View>
@@ -505,6 +601,13 @@ const styles = StyleSheet.create({
   carouselWrapper: { marginBottom: 8 },
   carouselContent: { gap: GAP },
   carouselPage: { gap: 10 },
+
+  skeletonContainer: { width: '100%' },
+  skeletonCard: { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' },
+  skeletonTextLarge: { height: 32, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 8, width: '60%', marginBottom: 12 },
+  skeletonTextSmall: { height: 14, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 4, width: '40%' },
+  skeletonMini: { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' },
+  skeletonLogRow: { height: 134, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
   
   mainCard: {
     width: '100%', height: 134, backgroundColor: '#1e1a23', borderRadius: 28, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -532,14 +635,35 @@ const styles = StyleSheet.create({
   miniProgressRing: { position: 'absolute', width: 60, height: 60, borderRadius: 30, borderWidth: 6 },
   miniProgressRingActive: { position: 'absolute', width: 60, height: 60, borderRadius: 30, borderWidth: 6 },
 
-  healthCard: { width: '100%', height: 134, backgroundColor: '#1e1a23', borderRadius: 28, padding: 18, borderWidth: 1, borderColor: colors.borderGray, marginTop: 10, justifyContent: 'center' },
-  healthHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  healthTitle: { fontSize: 16, fontWeight: '800', color: '#FFF' },
-  healthScore: { fontSize: 16, fontWeight: '800', color: '#FFF' },
-  healthProgressWrap: { height: 6, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden', marginBottom: 10 },
-  healthProgressBar: { ...StyleSheet.absoluteFillObject },
-  healthProgressFill: { height: '100%', backgroundColor: colors.accentGreen, borderRadius: 3 },
-  healthDesc: { fontSize: 11, color: '#9CA3AF', lineHeight: 16, fontWeight: '500' },
+  waterCard: { 
+     flexDirection: 'row', 
+     alignItems: 'center', 
+     justifyContent: 'space-between',
+     backgroundColor: '#1e1a23', 
+     borderRadius: 24, 
+     padding: 16, 
+     borderWidth: 1, 
+     borderColor: colors.borderGray, 
+     marginTop: 12 
+  },
+  waterLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  waterIconBg: { width: 48, height: 48, borderRadius: 12, backgroundColor: 'rgba(74, 144, 226, 0.1)', justifyContent: 'center', alignItems: 'center' },
+  waterLabels: { gap: 2 },
+  waterTitle: { fontSize: 16, fontWeight: '700', color: '#FFF' },
+  waterStatsRow: { flexDirection: 'row', alignItems: 'center' },
+  waterTotalText: { fontSize: 14, fontWeight: '800', color: colors.textSecondary },
+  waterControls: { flexDirection: 'row', gap: 10 },
+  waterCircleBtn: { 
+     width: 36, 
+     height: 36, 
+     borderRadius: 18, 
+     backgroundColor: 'rgba(255,255,255,0.05)', 
+     justifyContent: 'center', 
+     alignItems: 'center',
+     borderWidth: 1,
+     borderColor: colors.borderGray
+  },
+  waterPlusBtn: { backgroundColor: '#FFF' },
 
   paginationDots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 10, marginBottom: 4 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.1)' },

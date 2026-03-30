@@ -11,11 +11,40 @@ import {
   Alert,
   StatusBar,
   Image,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../services/api';
 import colors from '../../constants/colors';
+// Shimmer Effect Component
+const ShimmerPlaceholder = ({ style }) => {
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
+
+  return <Animated.View style={[style, { backgroundColor: 'rgba(255,255,255,0.05)', opacity }]} />;
+};
 
 export default function GroupsScreen({ navigation }) {
   const [groups, setGroups] = useState([]);
@@ -138,7 +167,17 @@ export default function GroupsScreen({ navigation }) {
         </View>
 
         {loading ? (
-          <ActivityIndicator color={colors.accentPurple} style={{ marginTop: 40 }} />
+          <View style={styles.listContainer}>
+            {[1, 2, 3, 4].map(i => (
+              <View key={i} style={styles.groupCard}>
+                <ShimmerPlaceholder style={styles.groupIcon} />
+                <View style={styles.groupInfo}>
+                  <ShimmerPlaceholder style={{ height: 18, width: '60%', borderRadius: 4, marginBottom: 8 }} />
+                  <ShimmerPlaceholder style={{ height: 12, width: '30%', borderRadius: 4 }} />
+                </View>
+              </View>
+            ))}
+          </View>
         ) : (
           <FlatList
             data={groups}

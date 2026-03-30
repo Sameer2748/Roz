@@ -7,14 +7,14 @@ const router = express.Router();
 // POST /water
 router.post('/', authenticate, async (req, res, next) => {
   try {
-    const { amount_ml } = req.body;
-    if (!amount_ml || amount_ml <= 0) {
-      return res.status(400).json({ success: false, error: 'amount_ml must be positive', code: 'VALIDATION_ERROR' });
+    const { amount_ml, date } = req.body;
+    if (!amount_ml || amount_ml === 0) {
+      return res.status(400).json({ success: false, error: 'amount_ml must be non-zero', code: 'VALIDATION_ERROR' });
     }
 
     const result = await db.query(
-      'INSERT INTO water_logs (user_id, amount_ml) VALUES ($1, $2) RETURNING *',
-      [req.user.id, amount_ml]
+      'INSERT INTO water_logs (user_id, amount_ml, logged_at) VALUES ($1, $2, COALESCE($3::TIMESTAMP, NOW())) RETURNING *',
+      [req.user.id, amount_ml, date || null]
     );
 
     res.status(201).json({ success: true, data: result.rows[0] });
@@ -26,11 +26,13 @@ router.post('/', authenticate, async (req, res, next) => {
 // GET /water/today
 router.get('/today', authenticate, async (req, res, next) => {
   try {
+    const { date } = req.query;
     const result = await db.query(
       `SELECT COALESCE(SUM(amount_ml), 0) as total_ml, COUNT(*) as entries
        FROM water_logs
-       WHERE user_id = $1 AND DATE(logged_at) = CURRENT_DATE`,
-      [req.user.id]
+       WHERE user_id = $1 
+       AND DATE(logged_at) = COALESCE($2::DATE, CURRENT_DATE)`,
+      [req.user.id, date || null]
     );
 
     res.json({

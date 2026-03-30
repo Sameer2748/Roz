@@ -11,7 +11,6 @@ import api from '../../services/api';
 import { getMealTypeByTime } from '../../utils/dateUtils';
 import useLogStore from '../../store/logStore';
 
-const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 export default function LogScreen({ route, navigation }) {
   const { width, height } = useWindowDimensions();
@@ -166,15 +165,7 @@ export default function LogScreen({ route, navigation }) {
       </View>
 
       <View style={styles.bottomControlLayer}>
-         <View style={styles.typeRow}>
-            {MEAL_TYPES.map(m => (
-              <TouchableOpacity key={m} style={[styles.typePill, mealType === m && styles.typePillActive]} onPress={() => setMealType(m)}>
-                 <Text style={[styles.typePillText, mealType === m && styles.typePillTextActive]}>{m.toUpperCase()}</Text>
-              </TouchableOpacity>
-            ))}
-         </View>
-
-         <View style={styles.mainCaptureRow}>
+          <View style={styles.mainCaptureRow}>
             <View style={{ width: 60 }} />
             <TouchableOpacity style={styles.shutterBig} onPress={takePhoto}>
                <View style={styles.shutterInner} />
