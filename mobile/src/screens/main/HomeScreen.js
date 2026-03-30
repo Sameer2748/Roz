@@ -456,18 +456,20 @@ export default function HomeScreen({ navigation, route }) {
             ) : (
               <>
                 {pendingLogs.map((item) => (
-                  <View key={item.id} style={[styles.logRow, { opacity: 0.7 }]}>
-                     <View style={styles.pendingImageWrap}>
-                        <View style={[styles.logImage, { backgroundColor: 'rgba(255,255,255,0.05)' }]} />
-                        <View style={styles.loaderOverlay}>
-                          <ActivityIndicator size="small" color="#FFF" />
-                        </View>
-                     </View>
-                     <View style={styles.logInfo}>
-                        <Text style={styles.pendingTitle}>Analyzing meal...</Text>
-                        <Text style={styles.pendingSub}>{item.meal_type.toUpperCase()}</Text>
-                        <View style={styles.shimmerBar} />
-                     </View>
+                  <View key={item.id} style={[styles.swipeWrapper, { opacity: 0.8, marginBottom: 12 }]}>
+                    <View style={styles.logRow}>
+                       <View style={styles.pendingImageWrap}>
+                          <View style={[styles.logImage, { backgroundColor: 'rgba(255,255,255,0.05)' }]} />
+                          <View style={styles.loaderOverlay}>
+                            <ActivityIndicator size="small" color="#FFF" />
+                          </View>
+                       </View>
+                       <View style={styles.logInfo}>
+                          <Text style={styles.pendingTitle}>Analyzing meal...</Text>
+                          <Text style={styles.pendingSub}>{item.meal_type.toUpperCase()}</Text>
+                          <View style={styles.shimmerBar} />
+                       </View>
+                    </View>
                   </View>
                 ))}
 
@@ -478,8 +480,9 @@ export default function HomeScreen({ navigation, route }) {
                     <Text style={styles.emptySub}>Track your nutrition by scanning meals</Text>
                   </View>
                 ) : (
-                  Object.keys(todayLogs).map((type) =>
-                    todayLogs[type].map((item) => (
+                  Object.values(todayLogs).flat()
+                    .sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at))
+                    .map((item) => (
                       <View key={item.id} style={styles.swipeWrapper}>
                         <Swipeable
                           friction={2}
@@ -489,7 +492,7 @@ export default function HomeScreen({ navigation, route }) {
                             <RectButton
                               style={styles.deleteAction}
                               onPress={() => {
-                                handleDeleteLog(item.id, type);
+                                handleDeleteLog(item.id, item.meal_type);
                               }}
                             >
                               <Ionicons name="trash" size={24} color="#FF453A" />
@@ -540,7 +543,6 @@ export default function HomeScreen({ navigation, route }) {
                         </Swipeable>
                       </View>
                     ))
-                  )
                 )}
               </>
             )}
