@@ -15,7 +15,7 @@ const AVATARS = [
 
 export default function RatingScreen({ navigation }) {
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('ReferralCode');
   };
 

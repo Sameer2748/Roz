@@ -20,7 +20,7 @@ export default function DietaryPrefsScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ dietary_preference: selected });
     navigation.navigate('Motivation');
   };

@@ -11,7 +11,7 @@ export default function PlanReadyScreen({ navigation }) {
   const { onboardingData, dailyTarget } = useUserStore();
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('Login');
   };
 

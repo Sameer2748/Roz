@@ -5,13 +5,25 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Button from '../../components/ui/Button';
 import colors from '../../constants/colors';
+import useAuthStore from '../../store/authStore';
+import useUserStore from '../../store/userStore';
 
 const { width } = Dimensions.get('window');
 const APP_ICON = require('../../../assets/icon_roz.png');
 
 export default function WelcomeScreen({ navigation }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const profile = useUserStore((s) => s.profile);
+
+  React.useEffect(() => {
+    // If user is already logged in but hasn't finished onboarding, skip welcome
+    if (isAuthenticated && (!profile || !profile.onboarding_complete)) {
+      navigation.navigate('Gender');
+    }
+  }, [isAuthenticated, profile]);
+
   const handleStart = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('Gender');
   };
 

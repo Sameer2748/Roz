@@ -21,7 +21,7 @@ export default function SourceScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ source: selected });
     navigation.navigate('PreviousApps');
   };

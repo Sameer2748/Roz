@@ -12,6 +12,7 @@ import {
   Animated,
   Alert
 } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -84,16 +85,17 @@ const ShimmerImage = ({ uri, style }) => {
 const ScrollableCalendar = ({ onDateSelect, selectedDate }) => {
   const scrollRef = useRef(null);
   
-  // Generate last 30 days
+  // Generate past 25 days + today + next 4 days
   const dates = useMemo(() => {
     const arr = [];
-    for (let i = 29; i >= 0; i--) {
+    // From 25 days ago to 4 days ahead
+    for (let i = -25; i <= 4; i++) {
       const d = new Date();
-      d.setDate(d.getDate() - i);
+      d.setDate(d.getDate() + i);
       arr.push({
         day: d.toLocaleString('en-US', { weekday: 'short' }),
         date: d.getDate(),
-        full: formatLocalDate(d), // Use local date string instead of ISO
+        full: formatLocalDate(d),
         raw: d
       });
     }
@@ -101,9 +103,10 @@ const ScrollableCalendar = ({ onDateSelect, selectedDate }) => {
   }, []);
 
   useEffect(() => {
-    // Initial scroll to end (today)
+    // Scroll to today's index (25) initially
     setTimeout(() => {
-      scrollRef.current?.scrollToEnd({ animated: false });
+      // Each day column is roughly 54px wide (including gap)
+      scrollRef.current?.scrollTo({ x: 25 * 54, animated: false });
     }, 100);
   }, []);
 
@@ -362,14 +365,28 @@ export default function HomeScreen({ navigation, route }) {
                       <Text style={styles.mainLabel}>Calories left</Text>
                     </View>
                     <View style={styles.bigRingContainer}>
-                       <View style={styles.bigRingTrack} />
-                       <View style={[styles.bigRingFill, { 
-                         borderLeftColor: '#FFF', 
-                         borderTopColor: '#FFF',
-                         borderBottomColor: calPct > 0.5 ? '#FFF' : 'transparent',
-                         borderRightColor: calPct > 0.75 ? '#FFF' : 'transparent',
-                         opacity: calPct > 0 ? 1 : 0
-                       }]} />
+                       <Svg width="84" height="84" viewBox="0 0 84 84" style={{ position: 'absolute' }}>
+                          <Circle
+                            cx="42"
+                            cy="42"
+                            r="38"
+                            stroke="rgba(255,255,255,0.05)"
+                            strokeWidth="8"
+                            fill="none"
+                          />
+                          <Circle
+                            cx="42"
+                            cy="42"
+                            r="38"
+                            stroke="#FFF"
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={`${2 * Math.PI * 38}`}
+                            strokeDashoffset={`${2 * Math.PI * 38 * (1 - calPct)}`}
+                            strokeLinecap="round"
+                            transform="rotate(-90 42 42)"
+                          />
+                       </Svg>
                        <View style={styles.iconCapsule}>
                           <Ionicons name="flame" size={24} color="#FFF" />
                        </View>
@@ -555,6 +572,8 @@ export default function HomeScreen({ navigation, route }) {
 
 function MacroMiniCard({ label, val, max, icon, color }) {
   const pct = Math.min(val / max, 1);
+  const R = 27;
+  const circumference = 2 * Math.PI * R;
   return (
     <View style={styles.miniCard}>
       <View style={styles.miniLabelGroup}>
@@ -562,16 +581,29 @@ function MacroMiniCard({ label, val, max, icon, color }) {
          <Text style={styles.miniEatenText}>{label} left</Text>
       </View>
       <View style={styles.miniProgressContainer}>
-         <View style={[styles.miniProgressRing, { borderColor: 'rgba(255,255,255,0.05)' }]} />
-         <View style={[styles.miniProgressRingActive, { 
-            borderColor: color, 
-            borderBottomColor: pct > 0.5 ? color : 'transparent',
-            borderRightColor: pct > 0.75 ? color : 'transparent',
-            borderLeftColor: color,
-            borderTopColor: color,
-            opacity: pct > 0 ? 1 : 0
-         }]} />
-         <MaterialCommunityIcons name={icon} size={22} color={color} />
+         <Svg width="60" height="60" viewBox="0 0 60 60">
+            <Circle
+              cx="30"
+              cy="30"
+              r={R}
+              stroke="rgba(255,255,255,0.05)"
+              strokeWidth="6"
+              fill="none"
+            />
+            <Circle
+              cx="30"
+              cy="30"
+              r={R}
+              stroke={color}
+              strokeWidth="6"
+              fill="none"
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={`${circumference * (1 - pct)}`}
+              strokeLinecap="round"
+              transform="rotate(-90 30 30)"
+            />
+         </Svg>
+         <MaterialCommunityIcons name={icon} size={22} color={color} style={{ position: 'absolute' }} />
       </View>
     </View>
   );

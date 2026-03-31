@@ -199,6 +199,8 @@ router.post('/onboarding', authenticate, async (req, res, next) => {
       allergies, meals_per_day, country_code,
     } = req.body;
 
+    console.log('DEBUG: Onboarding body received:', JSON.stringify(req.body, null, 2));
+
     // Update user country
     if (country_code) {
       await db.query('UPDATE users SET country_code = $1, updated_at = NOW() WHERE id = $2', [country_code, userId]);

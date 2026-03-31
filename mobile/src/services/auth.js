@@ -11,6 +11,9 @@ GoogleSignin.configure({
 export async function signInWithGoogle() {
   try {
     await GoogleSignin.hasPlayServices();
+    // Force account selector to show every time
+    try { await GoogleSignin.signOut(); } catch(_) {} 
+    
     const userInfo = await GoogleSignin.signIn();
     const idToken = userInfo.data?.idToken || userInfo.idToken;
 

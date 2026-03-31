@@ -50,8 +50,9 @@ export default function SpeedScreen({ navigation }) {
       let nextX = ctx.startX + event.translationX;
       nextX = Math.max(0, Math.min(SLIDER_WIDTH, nextX));
       
-      const oldVal = Math.round(interpolate(translateX.value, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 10);
-      const newVal = Math.round(interpolate(nextX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 10);
+      // Only trigger haptics on every 0.5 increment to keep it subtle
+      const oldVal = Math.round(interpolate(translateX.value, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 2);
+      const newVal = Math.round(interpolate(nextX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP) * 2);
       
       translateX.value = nextX;
       
@@ -63,7 +64,6 @@ export default function SpeedScreen({ navigation }) {
       const finalX = Math.max(0, Math.min(SLIDER_WIDTH, translateX.value));
       const finalSpeed = interpolate(finalX, [0, SLIDER_WIDTH], [0.2, 3.0], Extrapolate.CLAMP);
       runOnJS(setSpeed)(Math.round(finalSpeed * 10) / 10);
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
     }
   });
 
@@ -72,7 +72,7 @@ export default function SpeedScreen({ navigation }) {
   }));
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.selectionAsync();
     updateOnboardingData({ pace: speed });
     navigation.navigate('TwiceAsMuch');
   };

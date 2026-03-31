@@ -12,7 +12,7 @@ export default function HealthConnectScreen({ navigation }) {
   const [stage, setStage] = useState('thank_you'); // 'thank_you' or 'sync'
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (stage === 'thank_you') {
       setStage('sync');
     } else {

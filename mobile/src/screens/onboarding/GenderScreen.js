@@ -20,7 +20,7 @@ export default function GenderScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ gender: selected });
     navigation.navigate('ActivityLevel'); // Go to Workouts (ActivityLevel) next per design
   };

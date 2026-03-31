@@ -20,7 +20,7 @@ export default function ActivityLevelScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ activity_level: selected });
     navigation.navigate('Source');
   };

@@ -10,7 +10,7 @@ const HERO_IMAGE = require('../../../assets/clapping_hands_onboarding.jpg');
 
 export default function GeneratePlanScreen({ navigation }) {
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('PlanCreation');
   };
 

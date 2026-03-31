@@ -110,7 +110,7 @@ export default function DesiredWeightScreen({ navigation }) {
   });
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const targetKg = isMetric ? localTarget : localTarget * 0.453592;
     updateOnboardingData({ target_weight_kg: Number(targetKg.toFixed(1)) });
     navigation.navigate('RealisticTarget');

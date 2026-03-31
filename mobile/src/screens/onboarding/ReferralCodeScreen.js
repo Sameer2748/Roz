@@ -11,7 +11,7 @@ export default function ReferralCodeScreen({ navigation }) {
   const [code, setCode] = useState('');
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ referral_code: code.trim() });
     navigation.navigate('GeneratePlan');
   };

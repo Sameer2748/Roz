@@ -19,7 +19,7 @@ export default function GoalScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ goal: selected });
     navigation.navigate('DesiredWeight');
   };

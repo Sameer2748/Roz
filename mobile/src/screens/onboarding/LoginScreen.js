@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     if (loading) return;
     setLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     try {
       // 1. Authenticate with Google (or fallback dev login)
@@ -36,32 +36,30 @@ export default function LoginScreen({ navigation }) {
           // RootNavigator will switch to Main automatically
         }
       } else {
-        // 2b. Submit onboarding data and generate plan on backend for new users
-        const response = await api.post('/users/onboarding', {
-          age: onboardingData.age || 25,
-          gender: onboardingData.gender || 'male',
-          height_cm: onboardingData.height_cm || 180,
-          weight_kg: onboardingData.weight_kg || 75,
-          target_weight_kg: onboardingData.target_weight_kg || 70,
-          activity_level: onboardingData.activity_level || 'moderately_active',
-          goal: onboardingData.goal || 'fat_loss',
-          pace: onboardingData.pace || 1.0,
-          dietary_preference: onboardingData.dietary_preference || 'none',
-          allergies: [],
-          meals_per_day: 3
-        });
+        // 2b. Case: New user. Did they fill out the onboarding form in the app yet?
+        if (onboardingData.gender) {
+          // Yes! Submit their data to finalize the profile and create the plan
+          const response = await api.post('/users/onboarding', {
+            ...onboardingData,
+            age: onboardingData.age || 25,
+            allergies: onboardingData.allergies || [],
+            meals_per_day: onboardingData.meals_per_day || 3
+          });
 
-        if (response.data.success) {
-          const { plan } = response.data.data;
-          
-          // 3. Mark onboarding as complete and save final profile
-          const finalProfile = { ...onboardingData, onboarding_complete: true };
-          setProfile(finalProfile);
-          setDailyTarget(plan);
-          
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          if (response.data.success) {
+            const { plan } = response.data.data;
+            setProfile({ ...onboardingData, onboarding_complete: true });
+            setDailyTarget(plan);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
         } else {
-          throw new Error('Onboarding data synchronization failed');
+          // No! They clicked "Sign In" from the Welcome screen without filling the form.
+          // Force them to go through the questionnaire to get an accurate plan.
+          Alert.alert(
+            'Almost there!',
+            'Please complete your profile so we can create a personalized nutrition plan just for you.',
+            [{ text: 'Start Onboarding', onPress: () => navigation.replace('Gender') }]
+          );
         }
       }
     } catch (error) {

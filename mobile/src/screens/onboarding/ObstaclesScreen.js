@@ -28,7 +28,7 @@ export default function ObstaclesScreen({ navigation }) {
   };
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ obstacles: selected });
     navigation.navigate('DietaryPrefs');
   };

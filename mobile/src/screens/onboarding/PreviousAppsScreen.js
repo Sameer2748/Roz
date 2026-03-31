@@ -17,7 +17,7 @@ export default function PreviousAppsScreen({ navigation }) {
 
   const handleContinue = () => {
     if (!selected) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ used_previous_apps: selected === 'yes' });
     navigation.navigate('ProgressGraph');
   };

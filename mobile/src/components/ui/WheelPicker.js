@@ -68,7 +68,7 @@ export default function WheelPicker({ items, selectedIndex, onSelect, suffix = '
 
   // Haptic feedback is ultra-light, can stay on JS thread.
   const triggerHaptic = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.selectionAsync();
   };
 
   const handleSelect = (index) => {

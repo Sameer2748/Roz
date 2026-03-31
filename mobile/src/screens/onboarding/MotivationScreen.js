@@ -26,7 +26,7 @@ export default function MotivationScreen({ navigation }) {
   };
 
   const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateOnboardingData({ motivation: selected });
     navigation.navigate('GreatPotential');
   };

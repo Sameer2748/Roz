@@ -12,32 +12,40 @@ async function analyzeFood({ imageBase64, mimeType, userDescription, countryCode
     ? `\nQuantity hints extracted from user description: ${JSON.stringify(quantityHints)}`
     : '';
 
-  const prompt = `You are a precise nutritionist AI specializing in ${countryName} cuisine. Analyze this food image and estimate exact calorie and macronutrient content.
+  const prompt = `You are a World-Class Clinical Nutritionist and Vision AI. Your goal is to analyze the provided food image and user description with extreme precision to estimate calories and macronutrients.
 
-User context:
-- Country: ${countryName} (${countryCode})
-- Dietary preference: ${dietaryPreference}
-- Description from user: "${userDescription || 'none provided'}"
+### PERSONALIZATION CONTEXT:
+- **Location:** ${countryName} (${countryCode})
+- **Dietary Preference:** ${dietaryPreference}
+- **User's Input:** "${userDescription || 'No description provided'}"
 ${quantityHintText}
 
-COUNTRY-SPECIFIC COOKING ASSUMPTIONS FOR ${countryName}:
+### STEP 1: VISUAL SCANNING PROTOCOL (Must perform all steps):
+1. **Identify Primary Dish:** What is the main food item?
+2. **Scan for Hidden Ingredients:** Look for oils, butter on breads, ghee on rotis, cream in sauces, dressing on salads, or sugar/syrup on desserts.
+3. **Identify Side Dishes:** Are there pickles, chutneys, yogurt, or salad on the plate?
+4. **Volume Heuristic:** Use the plate size/hand/spoon visible in the background to estimate grams.
+   - Standard Dinner Plate: ~26cm diameter.
+   - Standard Bowl: ~200-250ml.
+   - Standard Spoon: ~5-15ml.
+
+### STEP 2: COUNTRY-SPECIFIC COOKING LOGIC (${countryName}):
 ${countrySpecificContext}
 
-QUANTITY ESTIMATION RULES:
-- Roti/Chapati: count visible pieces. Medium roti = ~80 kcal. With ghee = ~110 kcal.
-- Bowl of vegetable curry: small (150ml) = ~80 kcal, medium (200ml) = ~120 kcal, large (300ml) = ~180 kcal.
-- Dal: 200ml bowl = ~150 kcal. Add 30 kcal for ghee tadka.
-- Rice: 1 medium bowl cooked (~150g) = ~195 kcal.
-- Curd/Dahi: per 100ml full-fat = ~60 kcal.
-- If user specifies quantity in description, always use that as primary quantity signal.
+### STEP 3: LOGGING RULES:
+- **Quantity:** If the image is unclear, default to a standard "medium" serving (~150-200g). If the user provided a quantity in the description, prioritize it.
+- **Calories:** Do NOT undershoot. If the food looks oily/greasy, add 1-2 tbsp (120-240 kcal) of "hidden fats" to the item's oil count.
+- **Items:** Break down the analysis into individual components (e.g., "Paneer Tikka (6 pcs)", "Mint Chutney (2 tbsp)", "Lachha Paratha (1 pc)").
 
-IMPORTANT: Respond ONLY with valid JSON, no markdown, no explanation, no code blocks. Just raw JSON:
+### STEP 4: OUTPUT FORMAT (Strict JSON Only):
+Respond ONLY with raw JSON. No markdown, no "based on my analysis," no explanations.
+
 {
-  "food_name": "string",
+  "food_name": "Concise name of the overall meal",
   "items_detected": [
     {
-      "name": "string",
-      "quantity_description": "string",
+      "name": "Component name (e.g., Garlic Naan)",
+      "quantity_description": "Precise description (e.g., 2 large pieces)",
       "quantity_grams": number,
       "calories": number,
       "protein_g": number,
@@ -47,7 +55,7 @@ IMPORTANT: Respond ONLY with valid JSON, no markdown, no explanation, no code bl
       "sugar_g": number,
       "sodium_mg": number,
       "cholesterol_mg": number,
-      "cooking_notes": "string"
+      "cooking_notes": "Why this specific estimate? (e.g., looks like extra butter)"
     }
   ],
   "total": {
@@ -60,8 +68,8 @@ IMPORTANT: Respond ONLY with valid JSON, no markdown, no explanation, no code bl
     "sodium_mg": number,
     "cholesterol_mg": number
   },
-  "confidence": number,
-  "confidence_reason": "string",
+  "confidence": number (0.0 to 1.0),
+  "confidence_reason": "Explain briefly why (e.g., image is clear, portion well-defined)",
   "meal_type_suggestion": "breakfast|lunch|dinner|snack"
 }`;
 
