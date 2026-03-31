@@ -261,10 +261,10 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const target = dailyTarget || { calories: 2465, protein_g: 166, carbs_g: 295, fat_g: 68 };
-  const consumed = todayTotals;
-  const calCount = Math.round(consumed.calories);
-  const calMax = target.calories;
-  const calPct = Math.min(calCount / calMax, 1);
+  const consumed = todayTotals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+  const calCount = Math.round(consumed.calories || 0);
+  const calMax = target.calories || 1;
+  const calPct = isFinite(calCount / calMax) ? Math.min(calCount / calMax, 1) : 0;
 
   const onScroll = (event) => {
     const offsetX = event.nativeEvent.contentOffset.x;
@@ -571,7 +571,8 @@ export default function HomeScreen({ navigation, route }) {
 }
 
 function MacroMiniCard({ label, val, max, icon, color }) {
-  const pct = Math.min(val / max, 1);
+  const safeMax = max || 1;
+  const pct = isFinite(val / safeMax) ? Math.min(val / safeMax, 1) : 0;
   const R = 27;
   const circumference = 2 * Math.PI * R;
   return (

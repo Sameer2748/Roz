@@ -21,7 +21,7 @@ router.get('/me', authenticate, async (req, res, next) => {
 
     const profileResult = await db.query('SELECT * FROM user_profiles WHERE user_id = $1', [userId]);
     const targetResult = await db.query(
-      'SELECT * FROM daily_targets WHERE user_id = $1 ORDER BY effective_from DESC LIMIT 1',
+      'SELECT * FROM daily_targets WHERE user_id = $1 ORDER BY effective_from DESC, recalculated_at DESC LIMIT 1',
       [userId]
     );
     const streak = await getStreak(userId);
@@ -150,7 +150,7 @@ router.put('/profile', authenticate, async (req, res, next) => {
 
     const updatedProfile = await db.query('SELECT * FROM user_profiles WHERE user_id = $1', [userId]);
     const latestTarget = await db.query(
-      'SELECT * FROM daily_targets WHERE user_id = $1 ORDER BY effective_from DESC LIMIT 1',
+      'SELECT * FROM daily_targets WHERE user_id = $1 ORDER BY effective_from DESC, recalculated_at DESC LIMIT 1',
       [userId]
     );
 

@@ -5,6 +5,7 @@ import FoodDetailScreen from '../screens/main/FoodDetailScreen';
 import FixResultScreen from '../screens/main/FixResultScreen';
 import GroupDetailScreen from '../screens/main/GroupDetailScreen';
 import EditProfileScreen from '../screens/main/EditProfileScreen';
+import PlanUpdateFlow from '../screens/main/PlanUpdateFlow';
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ export default function MainStackNavigator() {
       <Stack.Screen name="FixResult" component={FixResultScreen} />
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="PlanUpdateFlow" component={PlanUpdateFlow} />
     </Stack.Navigator>
   );
 }

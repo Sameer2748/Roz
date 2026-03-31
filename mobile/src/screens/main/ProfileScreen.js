@@ -77,6 +77,17 @@ export default function ProfileScreen({ navigation }) {
              <StatCard label="Activity" value={formatActivity(profile?.activity_level)} icon="walk" color={colors.accentGold} />
           </View>
 
+          {/* Plan Management */}
+          <View style={styles.menuGroup}>
+            <Text style={styles.groupLabel}>Plan Management</Text>
+            <SettingsRow 
+              icon="refresh-circle-outline" 
+              label="Update Nutrition Plan" 
+              subtitle="Re-calculate your goals and plan"
+              onPress={() => navigation.navigate('PlanUpdateFlow')}
+            />
+          </View>
+
           {/* Settings Group */}
           <View style={styles.menuGroup}>
             <Text style={styles.groupLabel}>Account</Text>
